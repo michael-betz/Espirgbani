@@ -1,0 +1,41 @@
+
+body {
+	background-color: #404040;
+	font-family: sans-serif;
+}
+
+#main {
+	background-color: #d0FFd0;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	border: 2px solid #000000;
+	width: 90%;
+	margin: 0 auto;
+	padding: 20px
+}
+
+
+/*Debug console*/
+.shell-wrap {
+  width: 90%;
+  margin: 20px auto 0 auto;
+  /*border: 10px solid #4D4B44;*/
+}
+
+.shell-body {
+  margin: 0;
+  padding: 10px;
+  list-style: none;
+  background: #300A24;
+  color: #AAAAAA;
+  font: 0.8em 'Andale Mono', Consolas, 'Courier New';
+  line-height: 1.6em;
+  -webkit-border-radius: 10px;
+}
+
+.shell-body li {
+  word-wrap: break-word;
+  position: relative;
+  padding: 0 0 0 10px;
+}

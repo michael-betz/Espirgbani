@@ -1,0 +1,9 @@
+# traditional 2x 750 kB program + 2.4 MB spiffs
+# Name,   Type, SubType, Offset,   Size
+otadata,  data, ota,     0x006000, 0x002000
+# partition table        0x008000, 0x000C00
+nvs,      data, nvs,     0x009000, 0x007000
+main0, 	  app,  ota_0,	 0x010000, 0x0C0000
+main1,    app,  ota_1,   0x0D0000, 0x0C0000
+filesys,  data, spiffs,  0x190000, 0x270000
+# End of flash           0x400000

@@ -1,0 +1,170 @@
+// Copyright 2017 Espressif Systems (Shanghai) PTE LTD
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include <string.h>
+#include "esp_log.h"
+#include "wifi_startup.h"
+#include "web_console.h"
+#include "esp_heap_caps.h"
+#include "anim.h"
+#include "i2s_parallel.h"
+#include "app_main.h"
+
+static const char *T = "MAIN_APP";
+
+//Get a pixel from the image at pix, assuming the image is a 64x32 8R8G8B image
+//Returns it as an uint32 with the lower 24 bits containing the RGB values.
+static uint32_t getpixel(const unsigned char *pix, int x, int y) {
+    const unsigned char *p=pix+((x+y*64)*3);
+    return (p[0]<<16)|(p[1]<<8)|(p[2]);
+}
+
+void app_main()
+{
+    int brightness=62; //Change to set the global brightness of the display, range 1-62
+                       //Warning when set too high: Do not look into LEDs with remaining eye.
+    //------------------------------
+    // Enable RAM log file
+    //------------------------------
+    initFs();
+    esp_log_set_vprintf( wsDebugPrintf );
+    //------------------------------
+    // Startup wifi & webserver
+    //------------------------------
+    ESP_LOGI(T,"Starting network infrastructure ...");
+    wifi_conn_init();
+
+    i2s_parallel_buffer_desc_t bufdescA[2];
+    i2s_parallel_buffer_desc_t bufdescB[2];
+    i2s_parallel_config_t cfg={
+        // .gpio_bus={GPIO_R0, GPIO_G0, GPIO_B0, GPIO_R1, GPIO_G1, GPIO_B1, -1, -1, GPIO_A, GPIO_B, GPIO_C, GPIO_D, GPIO_LAT, GPIO_OE, -1, -1},
+        .gpio_bus={ GPIO_A, GPIO_B, GPIO_C, GPIO_D, GPIO_OE, GPIO_LAT, GPIO_R0, GPIO_G0, GPIO_B0, GPIO_R1, GPIO_G1, GPIO_B1, -1, -1, -1, -1 },
+        .gpio_clk=GPIO_CLK,
+        .bits=I2S_PARALLEL_BITS_16,
+        .clkspeed_hz=2*1000*1000,
+        .bufa=bufdescA,
+        .bufb=bufdescB
+    };
+
+    uint16_t *bitplane;
+    
+    bitplane=heap_caps_malloc(BITPLANE_SZ*2, MALLOC_CAP_DMA);
+    memset( bitplane, 0, BITPLANE_SZ*2 );
+    assert(bitplane && "Can't allocate bitplane memory");
+
+    bufdescA[0].memory=bitplane;
+    bufdescA[0].size=BITPLANE_SZ*2;  //[bytes]
+    bufdescA[1].memory=NULL;
+    bufdescB[0].memory=bitplane;
+    bufdescB[0].size=BITPLANE_SZ*2;  //[bytes]
+    bufdescB[1].memory=NULL;
+
+    //Setup I2S
+    i2s_parallel_setup(&I2S1, &cfg);
+
+    // int apos=0; //which frame in the animation we're on
+    int backbuf_id=0; //which buffer is the backbuffer, as in, which one is not active so we can write to it
+
+    //Fill bitplanes with the data for the current image
+    // const uint8_t *pix=&anim[apos*64*32*3];     //pixel data for this animation frame
+    // int mask=(1<<7);                //bitmask for pixel data in input for this bitplane
+    
+    
+    uint16_t v=0;
+    uint16_t *p=bitplane;           //bitplane location to write to
+    // for (unsigned int y=0; y<=511; y++) {
+    //     int x=y^1;
+    //     v = 0;
+    //     if (x&(1<<0)) v |= BIT_A;
+    //     if (x&(1<<1)) v |= BIT_B;
+    //     if (x&(1<<2)) v |= BIT_C;
+    //     if (x&(1<<3)) v |= BIT_D;
+    //     if (x&(1<<4)) v |= BIT_R0;
+    //     if (x&(1<<5)) v |= BIT_G0;
+    //     if (x&(1<<6)) v |= BIT_B0;
+    //     if (x&(1<<7)) v |= BIT_OE;
+    //     if (x&(1<<8)) v |= BIT_LAT;
+    //     *p++=v;
+    // }
+
+    //For a BITPLANE_SZ of 16
+    // p[ 0]: word  0
+    // p[ 1]: word 15
+    // p[ 2]: word  2
+    // p[ 3]: word  1
+    // p[ 4]: word  4
+    // p[ 5]: word  3
+    // p[ 6]: word  6
+    // p[ 7]: word  5
+    // p[ 8]: word  8
+    // p[ 9]: word  7
+    // p[10]: word 10
+    // p[11]: word  9
+    // p[12]: word 12
+    // p[13]: word 11
+    // p[14]: word 14
+    // p[15]: word 13
+    //For a BITPLANE_SZ of 32
+    // p[ 1]: word 31
+    
+    // for (v=0; v<BITPLANE_SZ/2; v++){
+    //     p[v^1] = v;
+    // }
+
+    // p[0] = 0b000000001;
+    // p[1] = 0b000000011;
+    // p[2] = 0b000000111;
+    // p[3] = 0b000001111;
+    // p[4] = 0b000011111;
+    // p[5] = 0b000111111;
+    // p[6] = 0b001111111;
+    // p[7] = 0b011111111;
+    // p[8] = 0b111111111;
+    // p[BITPLANE_SZ-1] = 0b111111111;
+
+    const uint8_t *pix=anim;     //pixel data for this animation frame
+    for (unsigned int y=0; y<16; y++) {
+        int lbits=0;                //Precalculate line bits of the *previous* line, which is the one we're displaying now
+        if ((y-1)&1) lbits|=BIT_A;
+        if ((y-1)&2) lbits|=BIT_B;
+        if ((y-1)&4) lbits|=BIT_C;
+        if ((y-1)&8) lbits|=BIT_D;
+        for (int x=0; x<64; x++) {
+            v=lbits;
+            //Do not show image while the line bits are changing / row is latching
+            if (x<=1 || x>=brightness ) v|=BIT_OE;
+            //latch on last bit
+            if (x==63) v|=BIT_LAT;
+
+            int c1, c2;
+            c1=getpixel(pix, x, y);
+            c2=getpixel(pix, x, y+16);
+            if (c1 & (1<<16)) v|=BIT_R0;
+            if (c1 & (1<<8 )) v|=BIT_G0;
+            if (c1 & (1<<0 )) v|=BIT_B0;
+            if (c2 & (1<<16)) v|=BIT_R1;
+            if (c2 & (1<<8 )) v|=BIT_G1;
+            if (c2 & (1<<0 )) v|=BIT_B1;
+
+            //Save the calculated value to the bitplane memory
+            *p++=v;
+        }
+    }
+
+    //Show our work!
+    i2s_parallel_flip_to_buffer(&I2S1, backbuf_id);
+}
+
+
+

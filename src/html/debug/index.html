@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<meta charset="utf-8" />
+<script src="ansi_up.js" type="text/javascript"></script>
+<script src="../flash/140medley.min.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<title>Velogen Debugging Console</title>
+
+<script language="javascript" type="text/javascript">
+
+  var xhr=j();
+  var wsUri = "ws://"+window.location.host+"/debug/ws.cgi";
+  // var wsUri = "ws://velogen/debug/ws.cgi";
+  var output;
+  var ansi_up = new AnsiUp;
+
+  function nc() {
+    return "?nocache="+Math.floor(Math.random()*100000).toString();
+  }
+
+  function readFile( fName ){
+    fName += nc();
+    console.log("GETing: "+fName);
+    xhr.open("GET", fName );
+    xhr.onreadystatechange=function() {
+      if (xhr.readyState==4 && xhr.status>=200 && xhr.status<300) {
+        xhr.responseText.replace("\r","").split("\n").forEach( function(e) {
+          writeToScreen( e );
+        });
+      }
+    }
+    xhr.send();
+  }
+
+  function init() {
+    output = document.getElementById("output");
+    readFile( "../log.txt" );
+    websocket = new WebSocket(wsUri);
+    websocket.onopen    = function(evt) { writeToScreen("WS CONNECTED"); };
+    websocket.onclose   = function(evt) { writeToScreen("WS DISCONNECTED"); };
+    websocket.onmessage = function(evt) { 
+      console.log(evt.data);
+      if(evt.data[0]=='a'){ 
+        writeToScreen(evt.data.slice(1)); 
+      } 
+    };
+    websocket.onerror   = function(evt) { writeToScreen('ERROR: ' + evt.data); };
+  }
+
+  function writeToScreen(message)
+  {
+    var pre = document.createElement("li");
+    var html = ansi_up.ansi_to_html(message);
+    pre.innerHTML = html;
+    output.appendChild(pre);
+    window.scrollBy(0, 100);
+  }
+
+  window.addEventListener("load", init, false);
+
+</script>
+<body>
+<h1>VeloGen Debug Console</h1>
+<div class="shell-wrap">
+  <ul class="shell-body", id="output"></ul>
+</div>
+</body>

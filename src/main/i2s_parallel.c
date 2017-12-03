@@ -28,7 +28,6 @@
 #include "soc/io_mux_reg.h"
 #include "rom/lldesc.h"
 #include "esp_heap_caps.h"
-#include "anim.h"
 #include "i2s_parallel.h"
 
 typedef struct {
@@ -136,25 +135,28 @@ void i2s_parallel_setup(i2s_dev_t *dev, const i2s_parallel_config_t *cfg) {
     //Enable LCD mode
     dev->conf2.val=0;
     dev->conf2.lcd_en=1;
+    //Data updated on clk rising edge
+    dev->conf2.lcd_tx_wrx2_en = 1;
+    dev->conf2.lcd_tx_sdx2_en = 0;
     
     dev->sample_rate_conf.val=0;
     dev->sample_rate_conf.rx_bits_mod=cfg->bits;
     dev->sample_rate_conf.tx_bits_mod=cfg->bits;
-    dev->sample_rate_conf.rx_bck_div_num=4; //ToDo: Unsure about what this does...
+    dev->sample_rate_conf.rx_bck_div_num=4;
     dev->sample_rate_conf.tx_bck_div_num=4;
     
     dev->clkm_conf.val=0;
     dev->clkm_conf.clka_en=0;
-    dev->clkm_conf.clkm_div_a=63;
-    dev->clkm_conf.clkm_div_b=63;
+    dev->clkm_conf.clkm_div_a=0;
+    dev->clkm_conf.clkm_div_b=0;
     //We ignore the possibility for fractional division here.
-    dev->clkm_conf.clkm_div_num=80000000L/cfg->clkspeed_hz;
+    dev->clkm_conf.clkm_div_num=4;
     
     dev->fifo_conf.val=0;
     dev->fifo_conf.rx_fifo_mod_force_en=1;
     dev->fifo_conf.tx_fifo_mod_force_en=1;
-    dev->fifo_conf.tx_fifo_mod=1;
-    dev->fifo_conf.tx_fifo_mod=1;
+    dev->fifo_conf.rx_fifo_mod=0;
+    dev->fifo_conf.tx_fifo_mod=0;
     dev->fifo_conf.rx_data_num=32; //Thresholds. 
     dev->fifo_conf.tx_data_num=32;
     dev->fifo_conf.dscr_en=1;
@@ -164,8 +166,8 @@ void i2s_parallel_setup(i2s_dev_t *dev, const i2s_parallel_config_t *cfg) {
     dev->conf1.tx_pcm_bypass=1;
     
     dev->conf_chan.val=0;
-    dev->conf_chan.tx_chan_mod=1;
-    dev->conf_chan.rx_chan_mod=1;
+    dev->conf_chan.tx_chan_mod=0;
+    dev->conf_chan.rx_chan_mod=0;
     
     //Invert ws to be active-low... ToDo: make this configurable
     dev->conf.tx_right_first=1;
