@@ -17,6 +17,7 @@
 #include "wifi_startup.h"
 #include "web_console.h"
 #include "rgb_led_panel.h"
+#include "sdcard.h"
 #include "app_main.h"
 
 static const char *T = "MAIN_APP";
@@ -25,12 +26,16 @@ void app_main(){
     //------------------------------
     // Enable RAM log file
     //------------------------------
-    initFs();
     esp_log_set_vprintf( wsDebugPrintf );
     //------------------------------
     // Init rgb tiles
     //------------------------------
     init_rgb();
+    //------------------------------
+    // Init filesystems
+    //------------------------------
+    initSpiffs();
+    initSd();
     //------------------------------
     // Startup wifi & webserver
     //------------------------------

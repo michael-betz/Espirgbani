@@ -69,8 +69,10 @@ const HttpdBuiltInUrl builtInUrls[]={
     {"/reboot",        cgiRebootFirmware,       NULL },
 
     {"/log.txt",       cgiEspRTC_LOG,           NULL },
-    {"/S",             cgiEspSPIFFSListHook,    NULL },
-    {"/S/*",           cgiEspSPIFFSHook,        NULL }, //Catch-all cgi function for the SPIFFS filesystem
+    {"/S",             cgiEspFilesListHook,    "/S" },
+    {"/SD",            cgiEspFilesListHook,    "/SD"},
+    {"/S/*",           cgiEspVfsHook,           NULL }, //Catch-all cgi function for the SPIFFS filesystem
+    {"/SD/*",          cgiEspVfsHook,           NULL }, //Catch-all cgi function for the SD card filesystem
     {"*",              cgiEspFsHook,            NULL }, //Catch-all cgi function for the static filesystem
     {NULL, NULL, NULL}
 };

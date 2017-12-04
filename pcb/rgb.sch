@@ -553,8 +553,8 @@ $Comp
 L rgb-rescue:R-RESCUE-rgb R4
 U 1 1 5A206FDA
 P 5200 3200
-F 0 "R4" V 5100 3000 50  0000 C CNN
-F 1 "10k" V 5084 3200 50  0000 C CNN
+F 0 "R4" V 5300 3050 50  0000 C CNN
+F 1 "10k" V 5300 3250 50  0000 C CNN
 F 2 "Resistors_SMD:R_0805" V 5130 3200 50  0001 C CNN
 F 3 "" H 5200 3200 50  0001 C CNN
 	1    5200 3200
@@ -709,4 +709,10 @@ Text Notes 7800 2600 0    60   ~ 0
 First prototype has D here
 Text Notes 6550 4200 3    60   ~ 0
 First prototype has B0 here
+Text Notes 4550 3100 0    60   ~ 0
+First prototype CS
+Text Notes 5400 3700 0    60   ~ 0
+REV1 CS
+Text Notes 5300 3800 0    60   ~ 0
+REV1 MISO
 $EndSCHEMATC

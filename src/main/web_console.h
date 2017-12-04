@@ -9,7 +9,7 @@
 
 // Initialize and mount SPIFFS (format if needed)
 // run at boot time
-extern void initFs();
+extern void initSpiffs();
 
 // register this with esp_log_set_vprintf()
 // will route log output to:

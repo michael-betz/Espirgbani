@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <dirent.h> 
 #include <sys/stat.h>
+// #include <sys/statvfs.h>
 #include "libesphttpd/esp.h"
 #include "esp_log.h"
 #include "esp_spiffs.h"
@@ -19,9 +20,10 @@ static const char *T = "CGI_C";
 //-----------------------------------------
 // List spiffs files as json
 //-----------------------------------------
-CgiStatus ICACHE_FLASH_ATTR cgiEspSPIFFSListHook(HttpdConnData *connData) {
+CgiStatus ICACHE_FLASH_ATTR cgiEspFilesListHook(HttpdConnData *connData) {
 	struct stat st;
 	struct dirent *dir;
+	const char* prefix = (const char*)connData->cgiArg;
 	DIR *d;
 	cJSON *jRoot, *jFiles, *jFile;
 	size_t partTotal = 0, partUsed = 0;
@@ -37,24 +39,27 @@ CgiStatus ICACHE_FLASH_ATTR cgiEspSPIFFSListHook(HttpdConnData *connData) {
 	// httpdHeader(connData, "Cache-Control", "max-age=10, must-revalidate");
 	httpdEndHeaders(connData);
 
-	if (NULL == (d=opendir("/S"))) {
+	if (NULL == (d=opendir(prefix))) {
 		ESP_LOGE(T,"Could not open root folder: %s", strerror(errno) );
 		return HTTPD_CGI_DONE;
 	}
-	
-    esp_spiffs_info(NULL, &partTotal, &partUsed);
 	jRoot = cJSON_CreateObject();
-	cJSON_AddNumberToObject( jRoot, "partTotal", partTotal );
-	cJSON_AddNumberToObject( jRoot, "partUsed",  partUsed );
+	if (strcmp(prefix,"/S") == 0){
+		esp_spiffs_info(NULL, &partTotal, &partUsed);
+		cJSON_AddNumberToObject( jRoot, "spiffsTotal", partTotal );
+		cJSON_AddNumberToObject( jRoot, "spiffsUsed",  partUsed );
+	}
+	// struct statvfs fsStats;
+	// if( statvfs( prefix, &fsStats) >= 0 ){
+	// 	cJSON_AddNumberToObject( jRoot, "fsTotal", fsStats.f_frsize*fsStats.f_blocks );
+	// 	cJSON_AddNumberToObject( jRoot, "fsFree",  fsStats.f_bsize *fsStats.f_bfree  );
+	// }
 	cJSON_AddItemToObject(   jRoot, "files", 	 jFiles=cJSON_CreateObject() );
 	while ( (dir = readdir(d)) ) {
-		// // Crude workaround for infinite loop with repeating filenames
-		// if( strcmp( lastFname, dir->d_name) == 0 ) break;
-		// if( !maxFiles-- ) break;
 		strcpy( lastFname, dir->d_name );
 		cJSON_AddItemToObject( jFiles, dir->d_name, jFile=cJSON_CreateObject() );
 		cJSON_AddNumberToObject( jFile, "d_type", dir->d_type );
-		snprintf( tempBuff, 37, "/S/%s", dir->d_name );
+		snprintf( tempBuff, 37, "%s/%s", prefix, dir->d_name );
 		if( stat(tempBuff, &st) >= 0 ){
 			cJSON_AddNumberToObject( jFile, "st_size",  st.st_size );
 			cJSON_AddNumberToObject( jFile, "st_atime", st.st_atime );
@@ -74,12 +79,12 @@ CgiStatus ICACHE_FLASH_ATTR cgiEspSPIFFSListHook(HttpdConnData *connData) {
 }
 
 //-----------------------------------------
-// Transfer file to / from SPIFFS
+// Transfer file to / from vfs
 //-----------------------------------------
 //This is a catch-all cgi function. It takes the url passed to it, looks up the corresponding
-//path in the SPIFFS filesystem and if it exists, passes the file through. This simulates what a normal
+//path in the vfs filesystem and if it exists, passes the file through. This simulates what a normal
 //webserver would do with static files.
-CgiStatus ICACHE_FLASH_ATTR cgiEspSPIFFSHook(HttpdConnData *connData) {
+CgiStatus ICACHE_FLASH_ATTR cgiEspVfsHook(HttpdConnData *connData) {
 	FILE *file=connData->cgiData;
 	HttpdPostData *p;
 	int len;
@@ -120,9 +125,9 @@ CgiStatus ICACHE_FLASH_ATTR cgiEspSPIFFSHook(HttpdConnData *connData) {
 
 	if( connData->requestType==HTTPD_METHOD_GET ){
 		//-----------------------------------------
-		// GET /S/*
+		// GET /*
 		//-----------------------------------------
-		// Read file from SPIFFS
+		// Read file from vfs
 		len=fread(buff, 1, 1024, file);
 		if (len>0) httpdSend(connData, buff, len);
 		if (len!=1024) {
@@ -135,9 +140,9 @@ CgiStatus ICACHE_FLASH_ATTR cgiEspSPIFFSHook(HttpdConnData *connData) {
 		}
 	} else {
 		//----------------------------------------------------
-		// POST /S/*
+		// POST /*
 		//----------------------------------------------------
-		// (Over)write file on spiffs
+		// (Over)write file on vfs
 		p = connData->post;
 		len = fwrite( p->buff, 1, p->buffLen, file );
 		if ( len != p->buffLen ){

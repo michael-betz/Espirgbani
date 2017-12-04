@@ -88,7 +88,7 @@ int wsDebugPrintf( const char *format, va_list arg ){
     return charLen;
 }
 
-void initFs(){
+void initSpiffs(){
     int temp=0;
     ESP_LOGI(T, "Initializing SPIFFS");
     esp_vfs_spiffs_conf_t conf = {
