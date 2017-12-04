@@ -146,6 +146,7 @@ CgiStatus ICACHE_FLASH_ATTR cgiEspVfsHook(HttpdConnData *connData) {
 		p = connData->post;
 		len = fwrite( p->buff, 1, p->buffLen, file );
 		if ( len != p->buffLen ){
+			fclose(file);
 			ESP_LOGE(T, "%d = fwrite(), should be %d, err: %s", len, p->buffLen, strerror(errno) );
 			httpdStartResponse(connData, 400);
 			httpdHeader(connData, "Content-Type", "text/plain");
