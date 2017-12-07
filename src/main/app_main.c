@@ -16,6 +16,7 @@
 #include "esp_log.h"
 #include "wifi_startup.h"
 #include "web_console.h"
+#include "libnsgif/libnsgif.h"
 #include "rgb_led_panel.h"
 #include "sdcard.h"
 #include "app_main.h"
@@ -31,6 +32,7 @@ void app_main(){
     // Init rgb tiles
     //------------------------------
     init_rgb();
+    g_rgbLedBrightness = 64;
     //------------------------------
     // Init filesystems
     //------------------------------
@@ -42,23 +44,44 @@ void app_main(){
     ESP_LOGI(T,"Starting network infrastructure ...");
     wifi_conn_init();
 
-    int frm=0;
+
+    // gif_bitmap_callback_vt bitmap_callbacks = {
+    //     bitmap_create,
+    //     bitmap_destroy,
+    //     bitmap_get_buffer,
+    //     bitmap_set_opaque,
+    //     bitmap_test_opaque,
+    //     bitmap_modified
+    // };
+    // gif_animation gif;
+    // /* create our gif animation */
+    // gif_create(&gif, &bitmap_callbacks);
+
+
+    int frm=1;
+    uint8_t aniZoom = 0x04;
     while(1){
         for( int y=0; y<=31; y++ )
             for( int x=0; x<=127; x++ )
-                setpixel(x, y, (x+y+frm)&0x2F, (x-y-frm)&0x2F, (x*y)&0x2F);
+                setpixel(x, y, (x+y+frm)&aniZoom, (x-y-frm)&aniZoom, (x^y)&aniZoom);
+        if( (frm%1024) == 0 ){
+            if( aniZoom == 0xFF ){
+                aniZoom = 0x04;
+            } else {
+                aniZoom = (aniZoom<<1)|1;
+            }
+        }
 
-        for( int x=0; x<=127; x++ ){
-            setpixel(x, 0, 5, 0, 0);
-            setpixel(x,31, 5, 0, 0);
-        }
-        for( int y=0; y<=31; y++ ){
-            setpixel(0,   y, 0, 5, 0);
-            setpixel(127, y, 0, 5, 0);
-        }
-        g_rgbLedBrightness = 32;
+        // for( int x=0; x<=127; x++ ){
+        //     setpixel(x, 0, 0xFF, 0xFF, 0xFF);
+        //     setpixel(x,31, 0xFF, 0xFF, 0xFF);
+        // }
+        // for( int y=0; y<=31; y++ ){
+        //     setpixel(0,   y, 0xFF, 0xFF, 0xFF);
+        //     setpixel(127, y, 0xFF, 0xFF, 0xFF);
+        // }
         updateFrame();
-        vTaskDelay(50 / portTICK_PERIOD_MS); //animation has an 100ms interval        
+        vTaskDelay(40 / portTICK_PERIOD_MS); //animation has an 100ms interval        
         frm++;
     }
 

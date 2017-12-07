@@ -87,8 +87,8 @@ void updateFrame(){
             for (int x=0; x<DISPLAY_WIDTH; x++) {
                 int v=lbits;
                 //Do not show image while the line bits are changing
-                if (x<2 || x>=g_rgbLedBrightness) v|=BIT_OE;
-                if (x==(DISPLAY_WIDTH-1)) 		  v|=BIT_LAT; //latch on last bit
+                if (x<8 || x>=8+g_rgbLedBrightness)   v|=BIT_OE;
+                if (x==(DISPLAY_WIDTH-1)) 		      v|=BIT_LAT; //latch on last bit
                 int c1 = getpixel(x, y);
                 int c2 = getpixel(x, y+16);
                 if (c1 & (mask<<16)) v|=BIT_R0;

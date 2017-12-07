@@ -43,7 +43,7 @@
 #define BIT_G1  (1<<10) 
 #define BIT_B1  (1<<11) 
 
-//Change to set the global brightness of the display, range 1 ... (DISPLAY_WIDTH-2)
+//Change to set the global brightness of the display, range 0 ... (DISPLAY_WIDTH-8)
 extern int g_rgbLedBrightness;
 
 void init_rgb();
