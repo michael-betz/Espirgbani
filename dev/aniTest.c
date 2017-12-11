@@ -90,7 +90,6 @@ int readHeaderEntry( FILE *f, headerEntry_t *h, int headerIndex ){
 		}		
 		fh++;
 	}
-	fseek( f, h->byteOffset+HEADER_SIZE, SEEK_SET );
 	return 0;
 }
 

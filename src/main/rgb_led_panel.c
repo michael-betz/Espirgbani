@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 #include "esp_log.h"
 #include "web_console.h"
 #include "esp_heap_caps.h"
@@ -27,7 +28,39 @@ void setpixel( int x, int y, uint8_t r, uint8_t g, uint8_t b ) {
     p[0]=r; p[1]=g; p[2]=b;
 }
 
+void setAll( uint8_t r, uint8_t g, uint8_t b ){
+    uint8_t *p = frameBuffer;
+    for( int i=0; i<DISPLAY_WIDTH*DISPLAY_HEIGHT; i++ ){
+        *p++=r; *p++=g; *p++=b;
+    }
+}
+
+void setFromFile( FILE *f, uint8_t r, uint8_t g, uint8_t b ){
+    uint8_t *p = frameBuffer;
+    uint8_t pix12, pix1, pix2, mr=r/15, mg=g/15, mb=b/15;
+    for( int y=0; y<DISPLAY_HEIGHT; y++ ){
+        for( int x=0; x<DISPLAY_WIDTH; x+=2 ){
+            fread( &pix12, 1, 1, f );
+            // unpack the 2 pixels per byte data into 1 pixel per byte
+            pix1 = pix12 >> 4;
+            pix2 = pix12 & 0x0F;
+            // write scaled color values to framebuffer
+            if ( pix1 == 0xA ){     // 0x0A means transparent color
+                p += 3;
+            } else {
+                *p++=mr*pix1; *p++=mg*pix1; *p++=mb*pix1;
+            }
+            if ( pix2 == 0xA ){
+                p += 3;
+            } else {
+                *p++=mr*pix2; *p++=mg*pix2; *p++=mb*pix2;
+            }
+        }
+    }
+}
+
 void init_rgb(){
+    setAll( 0x00, 0x00, 0x00 );
     i2s_parallel_buffer_desc_t bufdesc[2][1<<BITPLANE_CNT];
     i2s_parallel_config_t cfg={
         .gpio_bus={ GPIO_A, GPIO_B, GPIO_C, GPIO_D, GPIO_OE, GPIO_LAT, GPIO_R0, GPIO_G0, GPIO_B0, GPIO_R1, GPIO_G1, GPIO_B1, -1, -1, -1, -1 },
@@ -42,6 +75,7 @@ void init_rgb(){
         for (int j=0; j<2; j++) {
             bitplane[j][i]=heap_caps_malloc(BITPLANE_SZ*2, MALLOC_CAP_DMA);
             assert(bitplane[j][i] && "Can't allocate bitplane memory");
+            memset( bitplane[j][i], 0, BITPLANE_SZ*2 );
         }
     }
 

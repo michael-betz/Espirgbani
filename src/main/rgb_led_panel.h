@@ -2,15 +2,16 @@
 #define RGB_LED_PANEL_H
 
 //Width of the chain of panels (shift registers) [pixels]
-#define DISPLAY_WIDTH 128
+#define DISPLAY_WIDTH  128
+#define DISPLAY_HEIGHT  32
 
 //This is the bit depth, per RGB subpixel, of the data that is sent to the display.
 //The effective bit depth (in computer pixel terms) is less because of the PWM correction. With
 //a bitplane count of 7, you should be able to reproduce an 16-bit image more or less faithfully, though.
 #define BITPLANE_CNT 6
 
-//x*32 RGB leds, 2 pixels per 16-bit value...
-#define BITPLANE_SZ (DISPLAY_WIDTH*32/2)	//[16 bit words]
+//x*DISPLAY_HEIGHT RGB leds, 2 pixels per 16-bit value...
+#define BITPLANE_SZ (DISPLAY_WIDTH*DISPLAY_HEIGHT/2)	//[16 bit words]
 
 // GPIO definitions (change your pinout)
 #define GPIO_A       5
@@ -48,6 +49,14 @@ extern int g_rgbLedBrightness;
 
 void init_rgb();
 void updateFrame();
+
+// Set a single pixel to a specific color in the framebuffer
 void setpixel( int x, int y, uint8_t r, uint8_t g, uint8_t b );
+
+// read frameBuffer from a runDmd image file
+void setFromFile( FILE *f, uint8_t r, uint8_t g, uint8_t b );
+
+// Set whole screen to fixed color
+void setAll( uint8_t r, uint8_t g, uint8_t b );
 
 #endif
