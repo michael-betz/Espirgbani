@@ -50,13 +50,4 @@ extern int g_rgbLedBrightness;
 void init_rgb();
 void updateFrame();
 
-// Set a single pixel to a specific color in the framebuffer
-void setpixel( int x, int y, uint8_t r, uint8_t g, uint8_t b );
-
-// read frameBuffer from a runDmd image file
-void setFromFile( FILE *f, uint8_t r, uint8_t g, uint8_t b );
-
-// Set whole screen to fixed color
-void setAll( uint8_t r, uint8_t g, uint8_t b );
-
 #endif

@@ -166,7 +166,7 @@ int getKnownApPw( wifi_ap_record_t *foundAps, uint16_t foundNaps, uint8_t *ssid,
         ESP_LOGI(T, "ch: %2d, ssid: %16s, bssid: %02x:%02x:%02x:%02x:%02x:%02x, rssi: %d", currAp->primary, (char*)currAp->ssid, currAp->bssid[0], currAp->bssid[1], currAp->bssid[2], currAp->bssid[3], currAp->bssid[4], currAp->bssid[5], currAp->rssi );
         currAp++;
     }
-    if( (jRoot = readJsonDyn("/S/knownWifis.json")) ){
+    if( (jRoot = readJsonDyn("/SD/knownWifis.json")) ){
         // Go through all found APs, use ssid as key and try to get item from json
         for( i=0,currAp=foundAps; i<foundNaps; i++ ){
             jWifi = cJSON_GetObjectItem( jRoot, (char*)currAp->ssid);

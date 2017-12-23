@@ -21,7 +21,6 @@ void initSd(){
         .format_if_mount_failed = false,
         .max_files = 3	//Max number of open files
     };
-
     sdmmc_card_t* card;
     esp_err_t ret = esp_vfs_fat_sdmmc_mount("/SD", &host, &slot_config, &mount_config, &card);
 
@@ -33,6 +32,9 @@ void initSd(){
         }
         return;
     }
+
+    sdspi_host_set_card_clk( VSPI_HOST, 40000 );
+
     // Card has been initialized, print its properties
     sdmmc_card_print_info(stdout, card);
 }
