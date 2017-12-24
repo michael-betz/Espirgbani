@@ -36,7 +36,7 @@ typedef struct{
   uint8_t   spacingHoriz;
   uint8_t   spacingVert;
   uint8_t   outline;    //added with version 2
-  char      *fontName;  //n+1 string  14  null terminated string with length n
+  char      fontName[]; //n+1 string  14  null terminated string with length n
 } __attribute__ ((__packed__)) fontInfo_t;
 
 typedef struct{
@@ -51,10 +51,6 @@ typedef struct{
   uint8_t greenChnl;
   uint8_t blueChnl;
 } __attribute__ ((__packed__)) fontCommon_t;
-
-// typedef struct{
-//   char *pageNames;      //p*(n+1) strings 0 p null terminated strings, each with length n
-// } __attribute__ ((__packed__)) fontPages_t;
 
 typedef struct{
   uint32_t id;          //The character id.
@@ -73,17 +69,17 @@ typedef struct{
   uint32_t first;       //These fields are repeated until all kerning pairs have been described
   uint32_t second;
   int16_t  amount;
-} __attribute__ ((__packed__)) fontKerning_t;
+} __attribute__ ((__packed__)) fontKern_t;
 
 typedef struct{
-  fontInfo_t info;
-  fontCommon_t common;
-  // char **pageNames;     // Zero terminated strings
-  // int nNames;
+  fontInfo_t *info;
+  fontCommon_t *common;
+  char *pageNames;      // Zero terminated strings
+  int pageNamesLen;     // [bytes]
   fontChar_t *chars;
-  int nChars;
-  fontKerning_t *kerns;
-  int nKerns;
+  int charsLen;         // [bytes]
+  fontKern_t *kerns;
+  int kernsLen;         // [bytes]
 } font_t;
 
 FILE *loadBitmapFile( char *filename, bitmapFileHeader_t *bitmapFileHeader, bitmapInfoHeader_t *bitmapInfoHeader );
