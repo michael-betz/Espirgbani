@@ -140,18 +140,21 @@ void app_main(){
     ESP_LOGI( T, "biCompression   = %6d", bmpInfo.biCompression );
     ESP_LOGI( T, "biSizeImage     = %6d", bmpInfo.biSizeImage );
     ESP_LOGI( T, "biXPelsPerMeter = %6d", bmpInfo.biXPelsPerMeter );
+
     // FILE *bmpF, int xBmp, int yBmp, int wBmp, int hBmp, int xFb, int yFb, uint8_t layerFb, uint8_t rFb, uint8_t gFb, uint8_t bFb
     while(1){
-        copyBmpToFbRect( fntFile, 204, 144, 21, 20, 1, 1, 1, 0xFF, 0xFF, 0xFF );
-        copyBmpToFbRect( fntFile, 249,  27,  5, 21,24, 1, 1, 0xFF, 0xFF, 0xFF );
-        copyBmpToFbRect( fntFile,  65, 233, 15, 16,32, 1, 1, 0xFF, 0xFF, 0xFF );
+        copyBmpToFbRect( fntFile, &bmpInfo, 204, 144, 21, 20, 1, 1, 1, 0xFF, 0xFF, 0xFF );
+        copyBmpToFbRect( fntFile, &bmpInfo, 249,  27,  5, 21,24, 1, 1, 0xFF, 0xFF, 0xFF );
+        copyBmpToFbRect( fntFile, &bmpInfo,  65, 233, 15, 16,32, 1, 1, 0xFF, 0xFF, 0xFF );
         updateFrame();
         vTaskDelay(5000 / portTICK_PERIOD_MS);
         for ( int x=0; x<64; x++ ){
-            copyBmpToFbRect( fntFile, x, x/2, 64, 30, 1, 1, 1, 0xFF, 0xFF, 0xFF );
+            copyBmpToFbRect( fntFile, &bmpInfo, x, x/2, 64, 30, 1, 1, 1, 0xFF, 0xFF, 0xFF );
             updateFrame();
         }
         vTaskDelay(5000 / portTICK_PERIOD_MS);
+        font_t *tesFnt = loadFntFile( "/SD/ubuntu.fnt" );
+        printFontFile( tesFnt );
     }
     fclose( fntFile );
 
