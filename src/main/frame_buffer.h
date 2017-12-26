@@ -2,14 +2,14 @@
 #define FRAME_BUFFER_H
 #include "rgb_led_panel.h"
 
-#define N_LAYERS	2
+#define N_LAYERS	3
 
-extern uint8_t g_frameBuff[N_LAYERS][DISPLAY_WIDTH*32*4];
+extern uint32_t g_frameBuff[N_LAYERS][DISPLAY_WIDTH*DISPLAY_HEIGHT];
 
 extern uint32_t getBlendedPixel( int x, int y );
 
 // Set a single pixel on a layer to a specific RGBA color in the framebuffer
-extern void setPixel( uint8_t layer, int x, int y, uint8_t r, uint8_t g, uint8_t b, uint8_t a );
+void setPixel( uint8_t layer, uint16_t x, uint16_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t a );
 
 // Set whole layer to fixed color
 extern void setAll( uint8_t layer, uint8_t r, uint8_t g, uint8_t b, uint8_t a );

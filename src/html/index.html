@@ -4,13 +4,49 @@
 </head>
 <body>
 <div id="main">
-<h1>Espirgbani</h1>
-<p>
-A Pinball LED clock
-<ul>
-<li><a href="/debug">Debug console</a></li>
-<li><a href="/flash">OTA firmware update</a></li>
-</ul>
-</p>
+	<h1>Espirgbani</h1>
+	<p>
+	A Pinball LED clock
+	<ul>
+	<li><a href="/debug">Debug console</a></li>
+	<li><a href="/flash">OTA firmware update</a></li>
+	</ul>
+	</p>
+	<div class="slidecontainer">
+		Brightness:
+		<input type="range" min="1" max="120" value="50" class="slider" id="myRange">
+	</div>
+	<div id="output">
+		???
+	</div>
 </div>
+<script type="text/javascript">
+  // var wsUri = "ws://"+window.location.host+"/debug/ws.cgi";
+  var wsUri = "ws://espirgbani/ws.cgi";
+  var output;
+  var slider;
+
+  function init() {
+    output = document.getElementById("output");
+    slider = document.getElementById("myRange");
+    websocket = new WebSocket(wsUri);
+    websocket.onopen    = function(evt) { console.log("WS CONNECTED");    };
+    websocket.onclose   = function(evt) { console.log("WS DISCONNECTED"); };
+    websocket.onmessage = function(evt) { 
+      console.log("dat: " + evt.data);
+      if(evt.data[0]=='b'){ 
+        slider.value = evt.data.slice(1);
+      } 
+    };
+    websocket.onerror   = function(evt) { console.log("WS ERROR: "+evt); };
+    slider.oninput = function() {
+      // Update the current slider value (each time you drag the slider handle)
+      output.innerHTML = this.value;
+      websocket.send("b" + this.value);
+    }
+  }
+
+  window.addEventListener("load", init, false);
+
+</script>
 </body></html>

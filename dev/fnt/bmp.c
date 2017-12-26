@@ -22,27 +22,6 @@ bitmapFileHeader_t g_bmpFileHeader;
 bitmapInfoHeader_t g_bmpInfoHeader;
 fontInfo_t         g_fontInfo;
 
-void loadFntFile( char *fileName, font_t *fDat ){
-    
-}
-
-// Loads a <prefix>.bmp and <prefix>.fnt file
-void initFont( char *filePrefix ){
-    char tempFileName[32];
-    if ( g_bmpFile != NULL ){
-        fclose( g_bmpFile );
-        g_bmpFile = NULL;
-    }
-    sprintf( tempFileName, "/SD/%s.fnt", filePrefix );
-    loadFntFile( tempFileName, &g_fontInfo );
-    sprintf( tempFileName, "/SD/%s.bmp", filePrefix );
-    g_bmpFile = loadBitmapFile( tempFileName, &g_bmpFileHeader, &g_bmpInfoHeader );
-    if( g_bmpFile == NULL ){
-        ESP_LOGE(T, "Could not open %s", tempFileName);
-        return;
-    }
-}
-
 // Returns a filepointer seeked to the beginngin of the bitmap data
 FILE *loadBitmapFile( char *filename, bitmapFileHeader_t *bitmapFileHeader, bitmapInfoHeader_t *bitmapInfoHeader ) {
     FILE *filePtr; //our file pointer
@@ -74,7 +53,6 @@ FILE *loadBitmapFile( char *filename, bitmapFileHeader_t *bitmapFileHeader, bitm
 #define IMAGE_HEIGHT 256    //[pixels]
 #define BITS_PIXEL    24    //[bits]
 #define ROW_SIZE    ( (BITS_PIXEL * IMAGE_WIDTH + 31)/32 * 4 )  //[bytes]
-
 
 void copyBmpToFbRect( FILE *bmpF, int xBmp, int yBmp, int wBmp, int hBmp, int xFb, int yFb, uint8_t layerFb, uint8_t rFb, uint8_t gFb, uint8_t bFb ){
 	uint8_t rowBuffer[ROW_SIZE];

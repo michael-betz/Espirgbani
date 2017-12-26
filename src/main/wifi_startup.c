@@ -33,16 +33,38 @@
 
 #include "cgi.h"
 #include "cJSON.h"
+
+#include "rgb_led_panel.h"
+
 #include "wifi_startup.h"
 
 static const char *T = "WIFI_STARTUP";
 EventGroupHandle_t wifi_event_group;
 wifiState_t wifiState=WIFI_CON_TO_AP_MODE;
 
+void wsReceive(Websock *ws, char *data, int len, int flags){
+    // ESP_LOGI(T, "wsrx:");
+    // ESP_LOG_BUFFER_HEXDUMP(T, data, len, ESP_LOG_INFO);
+    if( data[0] == 'b' ){
+        uint16_t b = atoi( &data[1] );
+        if( b>1 && b<120 ){
+            g_rgbLedBrightness = b;
+        }
+    }
+}
+
+static void configWsConnect(Websock *ws) {
+    char tempBuff[32];
+    ws->recvCb = wsReceive;
+    sprintf( tempBuff, "b%d", g_rgbLedBrightness );
+    ESP_LOGI(T, "sending b state %s", tempBuff);
+    cgiWebsocketSend( ws, tempBuff, strlen(tempBuff), WEBSOCK_FLAG_NONE );
+}
+
 //Debugging Websocket connected.
 static void debugWsConnect(Websock *ws) {
     uint8_t *rip = ws->conn->remote_ip;
-    ESP_LOGI(T,"WS-client: %d.%d.%d.%d", rip[0], rip[1], rip[2], rip[3] );
+    ESP_LOGI(T,"debug WS-client: %d.%d.%d.%d", rip[0], rip[1], rip[2], rip[3] );
 }
 
 //------------------------------
@@ -60,6 +82,7 @@ CgiUploadFlashDef uploadParams = {
 const HttpdBuiltInUrl builtInUrls[]={
     // {"*", cgiRedirectApClientToHostname, HOSTNAME},
     {"/", cgiRedirect, "/index.html"},
+    {"/ws.cgi",        cgiWebsocket,            configWsConnect },
 
     {"/debug",         cgiRedirect,             "/debug/index.html" },
     {"/debug/ws.cgi",  cgiWebsocket,            debugWsConnect },

@@ -85,12 +85,12 @@ void updateFrame(){
                 if (x==(DISPLAY_WIDTH-1)) 		      v|=BIT_LAT; //latch on last bit
                 int c1 = getBlendedPixel(x, y);
                 int c2 = getBlendedPixel(x, y+16);
-                if (c1 & (mask<<16)) v|=BIT_R0;
+                if (c1 & (mask<< 0)) v|=BIT_R0;
                 if (c1 & (mask<< 8)) v|=BIT_G0;
-                if (c1 & (mask<< 0)) v|=BIT_B0;
-                if (c2 & (mask<<16)) v|=BIT_R1;
+                if (c1 & (mask<<16)) v|=BIT_B0;
+                if (c2 & (mask<< 0)) v|=BIT_R1;
                 if (c2 & (mask<< 8)) v|=BIT_G1;
-                if (c2 & (mask<< 0)) v|=BIT_B1;
+                if (c2 & (mask<<16)) v|=BIT_B1;
                 //Save the calculated value to the bitplane memory
                 *p++=v;
             }
