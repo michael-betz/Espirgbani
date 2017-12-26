@@ -14,15 +14,15 @@
 	</p>
 	<div class="slidecontainer">
 		Brightness:
-		<input type="range" min="1" max="120" value="50" class="slider" id="myRange">
+		<input type="range" min="2" max="120" value="0" class="slider" id="myRange">
 	</div>
 	<div id="output">
 		???
 	</div>
 </div>
 <script type="text/javascript">
-  // var wsUri = "ws://"+window.location.host+"/debug/ws.cgi";
-  var wsUri = "ws://espirgbani/ws.cgi";
+  var wsUri = "ws://"+window.location.host+"/ws.cgi";
+  // var wsUri = "ws://espirgbani/ws.cgi";
   var output;
   var slider;
 
@@ -36,6 +36,7 @@
       console.log("dat: " + evt.data);
       if(evt.data[0]=='b'){ 
         slider.value = evt.data.slice(1);
+        output.innerHTML = evt.data.slice(1);
       } 
     };
     websocket.onerror   = function(evt) { console.log("WS ERROR: "+evt); };

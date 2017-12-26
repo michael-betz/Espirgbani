@@ -48,6 +48,7 @@ void wsReceive(Websock *ws, char *data, int len, int flags){
     if( data[0] == 'b' ){
         uint16_t b = atoi( &data[1] );
         if( b>1 && b<120 ){
+            ESP_LOGI(T, "g_rgbLedBrightness = %d", b);
             g_rgbLedBrightness = b;
         }
     }

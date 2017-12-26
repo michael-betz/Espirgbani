@@ -103,7 +103,7 @@ void aniClockTask(void *pvParameters){
         startDrawing( 1 );
         setAll( 1, 0, 0, 0, 0xFF );
         uint16_t w = getStrWidth( strftime_buf );
-        drawStr( strftime_buf, (DISPLAY_WIDTH-w)/2, 0, 1, 0x00, 0x00, 0x00 );
+        drawStr( strftime_buf, (DISPLAY_WIDTH-w)/2, 0, 1, 0xFF, 0xFF, 0xFF );
         doneDrawing( 1 );
         // updateFrame();
         vTaskDelay( 1000*60 / portTICK_PERIOD_MS );
