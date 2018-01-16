@@ -33,8 +33,8 @@ FILE *loadBitmapFile( char *filename, bitmapFileHeader_t *bitmapFileHeader, bitm
 void copyBmpToFbRect( FILE *bmpF, bitmapInfoHeader_t *bmInfo, uint16_t xBmp, uint16_t yBmp, uint16_t w, uint16_t h, uint16_t xFb, uint16_t yFb, uint8_t layerFb, uint8_t rFb, uint8_t gFb, uint8_t bFb ){
     if ( bmpF==NULL || bmInfo==NULL )
         return;
-    int rowSize = ( (bmInfo->biBitCount * bmInfo->biWidth + 31)/32 * 4 );
-    uint8_t *rowBuffer = malloc( rowSize );
+    int rowSize = ( (bmInfo->biBitCount * bmInfo->biWidth + 31)/32 * 4 );       //how many bytes per row
+    uint8_t *rowBuffer = malloc( rowSize );                                     //allocate buffer for one input row
     if( rowBuffer==NULL ){
         ESP_LOGE(T, "Could not allocate rowbuffer");
         return;
@@ -55,7 +55,9 @@ void copyBmpToFbRect( FILE *bmpF, bitmapInfoHeader_t *bmInfo, uint16_t xBmp, uin
             if( rowAddr >= rowSize ){
                 break;
             }
-			setPixel( layerFb, colId+xFb, h-rowId-1+yFb, rFb, gFb, bFb, 255-(rowBuffer[rowAddr]) );
+            uint8_t shade = rowBuffer[rowAddr];
+            if( shade == 0 )    continue;                   // helps if letters overlay each other
+			setPixel( layerFb, colId+xFb, h-rowId-1+yFb, rFb, gFb, bFb, 255-shade );
 		}
     }
     fseek( bmpF, startPos, SEEK_SET );

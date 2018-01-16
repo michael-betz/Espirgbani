@@ -30,6 +30,9 @@
 
 static const char *T = "MAIN_APP";
 
+int dayBrightness = 70;
+int nightBrightness = 2;
+
 void drawTestAnimationFrame(){
     static int frm=1;
     static uint8_t aniZoom=0x04, boost=7;
@@ -79,8 +82,6 @@ void playAni( FILE *f, headerEntry_t *h ){
 // Random number within the range [a,b]
 #define RAND_AB(a,b) (rand()%(b+1-a)+a)
 
-enum {ANI_DMD, ANI_PATT} aniState;
-
 void aniBackgroundTask(void *pvParameters){
     ESP_LOGI(T,"aniBackgroundTask started");
     while(1){
@@ -93,17 +94,38 @@ void aniBackgroundTask(void *pvParameters){
 
 void aniClockTask(void *pvParameters){
     time_t now = 0;
+    int mins = 0;
+    uint8_t colR=0xFF, colG=0xFF, colB=0xFF;
     struct tm timeinfo = { 0 };
     char strftime_buf[64];
     ESP_LOGI(T,"aniClockTask started");
     while(1){
         time(&now);       
         localtime_r(&now, &timeinfo);
+        if( mins==0 || timeinfo.tm_min==0 ){
+            colR = RAND_AB(0x00,0xFF); colG = RAND_AB(0x00,0xFF); colB = RAND_AB(0x00,0xFF);
+            sprintf( strftime_buf, "/SD/fnt/%02d", RAND_AB(0,14) );
+            initFont( strftime_buf );
+            if( timeinfo.tm_hour>=23 || timeinfo.tm_hour<=7 ){
+                brightNessState = BR_NIGHT;
+            } else {
+                brightNessState = BR_DAY;
+            }
+            switch( brightNessState ){
+                case BR_DAY:
+                    g_rgbLedBrightness = dayBrightness;
+                    break;
+                case BR_NIGHT:
+                    g_rgbLedBrightness = nightBrightness;
+                    break;
+            }
+            mins++;
+        }
         strftime(strftime_buf, sizeof(strftime_buf), "%H:%M", &timeinfo);
         startDrawing( 1 );
         setAll( 1, 0, 0, 0, 0xFF );
         uint16_t w = getStrWidth( strftime_buf );
-        drawStr( strftime_buf, (DISPLAY_WIDTH-w)/2, 0, 1, 0xFF, 0xFF, 0xFF );
+        drawStr( strftime_buf, (DISPLAY_WIDTH-w)/2, 0, 1, colR, colG, colB );
         doneDrawing( 1 );
         // updateFrame();
         vTaskDelay( 1000*60 / portTICK_PERIOD_MS );
@@ -138,8 +160,8 @@ void app_main(){
     //------------------------------
     ESP_LOGI(T,"Starting network infrastructure ...");
     wifi_conn_init();
-    vTaskDelay(5000 / portTICK_PERIOD_MS);
 
+    vTaskDelay(20000 / portTICK_PERIOD_MS);
     //------------------------------
     // Set the clock / print time
     //------------------------------
@@ -155,7 +177,7 @@ void app_main(){
     ESP_LOGI(T, "Local Time: %s", strftime_buf);
     srand(time(NULL));
 
-    initFont( "/SD/ubuntu" );
+    initFont( "/SD/fnt/ubuntu" );
 
     // //------------------------------
     // // Startup animated background layer

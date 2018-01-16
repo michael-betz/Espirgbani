@@ -34,6 +34,7 @@
 #include "cgi.h"
 #include "cJSON.h"
 
+#include "app_main.h"
 #include "rgb_led_panel.h"
 
 #include "wifi_startup.h"
@@ -48,7 +49,16 @@ void wsReceive(Websock *ws, char *data, int len, int flags){
     if( data[0] == 'b' ){
         uint16_t b = atoi( &data[1] );
         if( b>1 && b<120 ){
-            ESP_LOGI(T, "g_rgbLedBrightness = %d", b);
+            switch( brightNessState ){
+                case BR_DAY:
+                    ESP_LOGI(T, "dayBrightness = %d", b);
+                    dayBrightness = b;
+                    break;
+                case BR_NIGHT:
+                    ESP_LOGI(T, "nightBrightness = %d", b);
+                    nightBrightness = b;
+                    break;
+            }
             g_rgbLedBrightness = b;
         }
     }
@@ -56,8 +66,19 @@ void wsReceive(Websock *ws, char *data, int len, int flags){
 
 static void configWsConnect(Websock *ws) {
     char tempBuff[32];
+    int b;
     ws->recvCb = wsReceive;
-    sprintf( tempBuff, "b%d", g_rgbLedBrightness );
+    switch( brightNessState ){
+        case BR_DAY:
+            b = dayBrightness;
+            break;
+        case BR_NIGHT:
+            b = nightBrightness;
+            break;
+        default:
+            b = 0;
+    }
+    sprintf( tempBuff, "b%d", b );
     ESP_LOGI(T, "sending b state %s", tempBuff);
     cgiWebsocketSend( ws, tempBuff, strlen(tempBuff), WEBSOCK_FLAG_NONE );
 }

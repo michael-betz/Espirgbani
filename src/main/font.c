@@ -146,7 +146,7 @@ void initFont( char *filePrefix ){
         ESP_LOGE(T, "Could not load %s", tempFileName);
         return;
     }
-    sprintf( tempFileName, "%s.bmp", filePrefix );
+    sprintf( tempFileName, "%s_0.bmp", filePrefix );
     ESP_LOGI(T, "Loading %s", tempFileName);
     g_bmpFile = loadBitmapFile( tempFileName, &g_bmpFileHeader, &g_bmpInfoHeader );
     if( g_bmpFile == NULL ){
