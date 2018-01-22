@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include<math.h>
 #include <time.h>
 #include "esp_log.h"
 #include "wifi_startup.h"
@@ -34,23 +35,49 @@ int dayBrightness = 70;
 int nightBrightness = 2;
 
 void drawTestAnimationFrame(){
-    static int frm=1;
-    static uint8_t aniZoom=0x04, boost=7;
+    static int frm=0;
+    static int aniZoom=0x04, boost=7;
     startDrawing( 0 );
     for( int y=0; y<=31; y++ )
         for( int x=0; x<=127; x++ )
             setPixel( 0, x, y, ((x+y+frm)&aniZoom)*boost, ((x-y-frm)&aniZoom)*boost, ((x^y)&aniZoom)*boost, 0 );
     doneDrawing( 0 );
     if( (frm%1024) == 0 ){
-        if( aniZoom == 0xFF ){
-            aniZoom = 0x04;
-            boost=8;
-        } else {
-            aniZoom = (aniZoom<<1)|1;
-            boost = (boost>>1) | 1;
-        }
+        aniZoom = RAND_AB(1,0xFFFF);
+        boost   = RAND_AB(1,16);
+        ESP_LOGI(T, "aniZoom = %d,  boost = %d", aniZoom, boost);
     }
     frm++;
+}
+
+void drawPlasmaFrame(){
+    // doesnt work yet and super slow
+    int x,y,sec;
+    double dx,dy,dv;
+    time_t t;
+    time(&t);
+    sec = (localtime(&t))->tm_sec;
+    startDrawing( 0 );
+    for(x=0;x<=127;x++){
+        for(y=0;y<=31;y++){
+            dx = x + .5 * sin(sec/5.0);
+            dy = y + .5 * cos(sec/3.0);
+            dv = sin(x*10 + sec) + sin(10*(x*sin(sec/2.0) + y*cos(sec/3.0)) + sec) + sin(sqrt(100*(dx*dx + dy*dy)+1) + sec);
+            setPixel( 0, x, y, 255*fabs(sin(dv*pi)), 255*fabs(sin(dv*pi + 2*pi/3)), 255*fabs(sin(dv*pi + 4*pi/3)), 0 );
+        }
+    }
+    doneDrawing( 0 );
+}
+
+void aniBackgroundTask(void *pvParameters){
+    ESP_LOGI(T,"aniBackgroundTask started");
+    while(1){
+        drawTestAnimationFrame();
+        // drawPlasmaFrame();
+        updateFrame();
+        vTaskDelay( 20 / portTICK_PERIOD_MS );
+    }
+    vTaskDelete( NULL );
 }
 
 void seekToFrame( FILE *f, int byteOffset, int frameOffset ){
@@ -79,19 +106,6 @@ void playAni( FILE *f, headerEntry_t *h ){
     }
 }
 
-// Random number within the range [a,b]
-#define RAND_AB(a,b) (rand()%(b+1-a)+a)
-
-void aniBackgroundTask(void *pvParameters){
-    ESP_LOGI(T,"aniBackgroundTask started");
-    while(1){
-        drawTestAnimationFrame();
-        updateFrame();
-        vTaskDelay( 20 / portTICK_PERIOD_MS );
-    }
-    vTaskDelete( NULL );
-}
-
 void aniClockTask(void *pvParameters){
     time_t now = 0;
     int mins = 0;
@@ -103,7 +117,7 @@ void aniClockTask(void *pvParameters){
         time(&now);       
         localtime_r(&now, &timeinfo);
         if( mins==0 || timeinfo.tm_min==0 ){
-            colR = RAND_AB(0x00,0xFF); colG = RAND_AB(0x00,0xFF); colB = RAND_AB(0x00,0xFF);
+            colR = RAND_AB(0,16)*8; colG = RAND_AB(0,16)*8; colB = RAND_AB(0,16)*8;
             sprintf( strftime_buf, "/SD/fnt/%02d", RAND_AB(0,14) );
             initFont( strftime_buf );
             if( timeinfo.tm_hour>=23 || timeinfo.tm_hour<=7 ){
@@ -160,8 +174,9 @@ void app_main(){
     //------------------------------
     ESP_LOGI(T,"Starting network infrastructure ...");
     wifi_conn_init();
+    xEventGroupWaitBits(wifi_event_group, CONNECTED_BIT, 0, 0, 20000/portTICK_PERIOD_MS);
+    vTaskDelay(3000 / portTICK_PERIOD_MS);
 
-    vTaskDelay(20000 / portTICK_PERIOD_MS);
     //------------------------------
     // Set the clock / print time
     //------------------------------
