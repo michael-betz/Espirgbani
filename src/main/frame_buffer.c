@@ -88,6 +88,27 @@ void setAll( uint8_t layer, uint8_t r, uint8_t g, uint8_t b, uint8_t a ){
     }
 }
 
+uint32_t incrAlpha( uint8_t layer, uint8_t speed ){
+    if( layer >= N_LAYERS ){
+		return 0;
+	}
+	if( speed <= 0 )	speed = 1;
+    uint32_t *p = (uint32_t*)g_frameBuff[layer];
+    uint32_t nTouched=0;
+    for( int i=0; i<DISPLAY_WIDTH*DISPLAY_HEIGHT; i++ ){
+        int a = GA(*p);
+        if( a < 255 ){
+        	a += speed;
+        	if( a > 255 )	a = 255;
+        	*p &= 0x00FFFFFF;
+        	*p |= a<<24;
+        	nTouched++;
+        }
+        p++;
+    }
+    return nTouched;
+}
+
 // write scaled color values to framebuffer [RGBA]
 #define SET_ANI_PIXEL( p, mr, mg, mb, pix ) { *p++ = (((pix==0x0A)?0xFF:0x00)<<24) | ((mb*pix)<<16) | ((mg*pix)<<8) | (mr*pix); }
 

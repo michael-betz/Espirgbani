@@ -17,6 +17,10 @@ extern void setAll( uint8_t layer, uint8_t r, uint8_t g, uint8_t b, uint8_t a );
 // write image from a runDmd image file into layer with shades of color r g b
 extern void setFromFile( FILE *f, uint8_t layer, uint8_t r, uint8_t g, uint8_t b );
 
+// Increments the alpha value of every pixel by `speed` until it reaches 255
+// returns the number of pixels which have been touched
+uint32_t incrAlpha( uint8_t layer, uint8_t speed );
+
 
 void initFb();
 void startDrawing( uint8_t layer );

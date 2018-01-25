@@ -108,33 +108,28 @@ void playAni( FILE *f, headerEntry_t *h ){
 
 void aniClockTask(void *pvParameters){
     time_t now = 0;
-    int mins = 0;
     uint8_t colR=0xFF, colG=0xFF, colB=0xFF;
-    struct tm timeinfo = { 0 };
+    struct tm timeinfo;
+    timeinfo.tm_min =  0;
+    timeinfo.tm_hour= 18;
     char strftime_buf[64];
+    srand(time(NULL));
     ESP_LOGI(T,"aniClockTask started");
     while(1){
-        time(&now);       
-        localtime_r(&now, &timeinfo);
-        if( mins==0 || timeinfo.tm_min==0 ){
+        if( timeinfo.tm_min==0 ){
             colR = RAND_AB(0,16)*8; colG = RAND_AB(0,16)*8; colB = RAND_AB(0,16)*8;
             sprintf( strftime_buf, "/SD/fnt/%02d", RAND_AB(0,14) );
             initFont( strftime_buf );
             if( timeinfo.tm_hour>=23 || timeinfo.tm_hour<=7 ){
                 brightNessState = BR_NIGHT;
+                g_rgbLedBrightness = nightBrightness;
             } else {
                 brightNessState = BR_DAY;
+                g_rgbLedBrightness = dayBrightness;
             }
-            switch( brightNessState ){
-                case BR_DAY:
-                    g_rgbLedBrightness = dayBrightness;
-                    break;
-                case BR_NIGHT:
-                    g_rgbLedBrightness = nightBrightness;
-                    break;
-            }
-            mins++;
         }
+        time(&now);       
+        localtime_r(&now, &timeinfo);
         strftime(strftime_buf, sizeof(strftime_buf), "%H:%M", &timeinfo);
         startDrawing( 1 );
         setAll( 1, 0, 0, 0, 0xFF );
@@ -189,7 +184,7 @@ void app_main(){
     time(&now);       
     localtime_r(&now, &timeinfo);
     strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
-    ESP_LOGI(T, "Local Time: %s", strftime_buf);
+    ESP_LOGI(T, "Local Time: %s (%ld)", strftime_buf, time(NULL));
     srand(time(NULL));
 
     initFont( "/SD/fnt/ubuntu" );
@@ -218,27 +213,33 @@ void app_main(){
     while(1){
         aniId = RAND_AB( 0, fh.nAnimations-1 );
         readHeaderEntry( f, &myHeader, aniId );
-        ESP_LOGI(T, "%s", myHeader.name);
-        ESP_LOGI(T, "--------------------------------");
-        ESP_LOGI(T, "animationId:       0x%04X", myHeader.animationId);
-        ESP_LOGI(T, "nStoredFrames:         %d", myHeader.nStoredFrames);
-        ESP_LOGI(T, "byteOffset:    0x%08X", myHeader.byteOffset);
-        ESP_LOGI(T, "nFrameEntries:         %d", myHeader.nFrameEntries);
-        ESP_LOGI(T, "width:               0x%02X", myHeader.width);
-        ESP_LOGI(T, "height:              0x%02X", myHeader.height);
-        ESP_LOGI(T, "unknowns:            0x%02X", myHeader.unknown0 );
-        ESP_LOG_BUFFER_HEX( T, myHeader.unknown1, sizeof(myHeader.unknown1) );
-        ESP_LOGI(T, "frametimes:");
-        ESP_LOG_BUFFER_HEX( T, myHeader.frameHeader, myHeader.nFrameEntries*2 );
+        ESP_LOGD(T, "%s", myHeader.name);
+        ESP_LOGD(T, "--------------------------------");
+        ESP_LOGD(T, "animationId:       0x%04X", myHeader.animationId);
+        ESP_LOGD(T, "nStoredFrames:         %d", myHeader.nStoredFrames);
+        ESP_LOGD(T, "byteOffset:    0x%08X", myHeader.byteOffset);
+        ESP_LOGD(T, "nFrameEntries:         %d", myHeader.nFrameEntries);
+        ESP_LOGD(T, "width:               0x%02X", myHeader.width);
+        ESP_LOGD(T, "height:              0x%02X", myHeader.height);
+        ESP_LOGD(T, "unknowns:            0x%02X", myHeader.unknown0 );
+        // ESP_LOG_BUFFER_HEX( T, myHeader.unknown1, sizeof(myHeader.unknown1) );
+        // ESP_LOGI(T, "frametimes:");
+        // ESP_LOG_BUFFER_HEX( T, myHeader.frameHeader, myHeader.nFrameEntries*2 );
         playAni( f, &myHeader );
         free( myHeader.frameHeader );
         myHeader.frameHeader = NULL;
-        vTaskDelay( 1000 / portTICK_PERIOD_MS);
-        startDrawing( 2 );
-        setAll( 2, 0, 0, 0, 0xFF );
-        doneDrawing( 2 );
+        // Keep a single frame displayed for a bit
+        if( myHeader.nStoredFrames<=3 || myHeader.nFrameEntries<=3 ) vTaskDelay( 3000/portTICK_PERIOD_MS );
+        // Fade out the frame
+        uint32_t nTouched = 1;
+        while( nTouched ){
+            startDrawing( 2 );
+            nTouched = incrAlpha( 2, RAND_AB(1,16) );
+            doneDrawing( 2 );
+            // updateFrame();
+            vTaskDelay( 20 / portTICK_PERIOD_MS);
+        }
         vTaskDelay(15000 / portTICK_PERIOD_MS);
-        ESP_LOGI(T, "\n");
     }
     fclose(f);
 }
