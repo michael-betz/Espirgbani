@@ -2,8 +2,8 @@
 fileVersion=1
 
 # font settings
-fontName=Anime Ace
-fontFile=fonts/animeace.ttf
+fontName=GoodTimesRg-Regular
+fontFile=fonts/good times rg.ttf
 charSet=0
 fontSize=-28
 aa=1
