@@ -36,45 +36,65 @@ int nightBrightness = 2;
 
 void drawTestAnimationFrame(){
     static int frm=0;
-    static int aniZoom=0x04, boost=7;
+    static uint16_t aniZoom=0x04, boost=7;
     startDrawing( 0 );
     for( int y=0; y<=31; y++ )
         for( int x=0; x<=127; x++ )
-            setPixel( 0, x, y, ((x+y+frm)&aniZoom)*boost, ((x-y-frm)&aniZoom)*boost, ((x^y)&aniZoom)*boost, 0 );
+            setPixel( 0, x, y, SRGBA( ((x+y+frm)&aniZoom)*boost, ((x-y-frm)&aniZoom)*boost, ((x^y)&aniZoom)*boost, 0xFF ) );
     doneDrawing( 0 );
     if( (frm%1024) == 0 ){
-        aniZoom = RAND_AB(1,0xFFFF);
-        boost   = RAND_AB(1,16);
+        aniZoom = rand();
+        boost   = RAND_AB(1,8);
         ESP_LOGI(T, "aniZoom = %d,  boost = %d", aniZoom, boost);
     }
     frm++;
 }
 
 void drawPlasmaFrame(){
-    // doesnt work yet and super slow
-    int x,y,sec;
-    double dx,dy,dv;
-    time_t t;
-    time(&t);
-    sec = (localtime(&t))->tm_sec;
+    static int frm=3001, i, j, k, l;
+    int temp1, temp2;
+    if( frm > 3000 ){
+        frm = 0;
+        i = RAND_AB(1,8);
+        j = RAND_AB(1,8);
+        k = ((i<<5)-1);
+        l = ((j<<5)-1);
+    }
     startDrawing( 0 );
-    for(x=0;x<=127;x++){
-        for(y=0;y<=31;y++){
-            dx = x + .5 * sin(sec/5.0);
-            dy = y + .5 * cos(sec/3.0);
-            dv = sin(x*10 + sec) + sin(10*(x*sin(sec/2.0) + y*cos(sec/3.0)) + sec) + sin(sqrt(100*(dx*dx + dy*dy)+1) + sec);
-            setPixel( 0, x, y, 255*fabs(sin(dv*pi)), 255*fabs(sin(dv*pi + 2*pi/3)), 255*fabs(sin(dv*pi + 4*pi/3)), 0 );
+    for( int y=0; y<=31; y++ ){
+        for( int x=0; x<=127; x++ ){
+            temp1 = abs((( i*y+(frm*16)/(x+16))%64)-32)*7;
+            temp2 = abs((( j*x+(frm*16)/(y+16))%64)-32)*7;
+            setPixel( 0, x, y, SRGBA( temp1&k, temp2&l, (temp1^temp2)&0x88, 0xFF ) );
         }
     }
     doneDrawing( 0 );
+    frm++;    
 }
 
 void aniBackgroundTask(void *pvParameters){
     ESP_LOGI(T,"aniBackgroundTask started");
+    uint32_t frameCount = 1;
+    uint8_t aniMode = 0;
     while(1){
-        drawTestAnimationFrame();
-        // drawPlasmaFrame();
+        switch( aniMode ){
+            case 1:
+                drawTestAnimationFrame();
+                break;
+            case 2:
+                drawPlasmaFrame();
+                break;
+            default:
+                vTaskDelay( 10 / portTICK_PERIOD_MS );
+        }
         updateFrame();
+        if( (frameCount%10000) == 0 ){
+            aniMode = RAND_AB(0,2);
+            if( aniMode == 0 ){
+                setAll( 0, 0xFF000000 );
+            }
+        }
+        frameCount++;
         vTaskDelay( 20 / portTICK_PERIOD_MS );
     }
     vTaskDelete( NULL );
@@ -86,19 +106,16 @@ void seekToFrame( FILE *f, int byteOffset, int frameOffset ){
 }
 
 void playAni( FILE *f, headerEntry_t *h ){
-    uint8_t r, g, b;
-    r = rand()|0x1F;
-    g = rand()|0x1F;
-    b = rand()|0x1F;
+    uint32_t aniCol = rand();
     for( int i=0; i<h->nFrameEntries; i++ ){
         frameHeaderEntry_t fh = h->frameHeader[i];
         if( fh.frameId == 0 ){
             startDrawing( 2 );
-            setAll( 2, 0, 0, 0, 0 );
+            setAll( 2, 0xFF000000 );
         } else {
             seekToFrame( f, h->byteOffset+HEADER_SIZE, fh.frameId-1 );
             startDrawing( 2 );
-            setFromFile( f, 2, r, g, b );
+            setFromFile( f, 2, aniCol );
         }
         doneDrawing( 2 );
         // updateFrame();
@@ -108,7 +125,7 @@ void playAni( FILE *f, headerEntry_t *h ){
 
 void aniClockTask(void *pvParameters){
     time_t now = 0;
-    uint8_t colR=0xFF, colG=0xFF, colB=0xFF;
+    // uint32_t colFill = 0xFF880088;
     struct tm timeinfo;
     timeinfo.tm_min =  0;
     timeinfo.tm_hour= 18;
@@ -117,8 +134,8 @@ void aniClockTask(void *pvParameters){
     ESP_LOGI(T,"aniClockTask started");
     while(1){
         if( timeinfo.tm_min==0 ){
-            colR = RAND_AB(0,16)*8; colG = RAND_AB(0,16)*8; colB = RAND_AB(0,16)*8;
-            sprintf( strftime_buf, "/SD/fnt/%02d", RAND_AB(0,14) );
+            // colFill = rand();
+            sprintf( strftime_buf, "/SD/fnt/%d", RAND_AB(0,15) );
             initFont( strftime_buf );
             if( timeinfo.tm_hour>=23 || timeinfo.tm_hour<=7 ){
                 brightNessState = BR_NIGHT;
@@ -131,11 +148,7 @@ void aniClockTask(void *pvParameters){
         time(&now);       
         localtime_r(&now, &timeinfo);
         strftime(strftime_buf, sizeof(strftime_buf), "%H:%M", &timeinfo);
-        startDrawing( 1 );
-        setAll( 1, 0, 0, 0, 0xFF );
-        uint16_t w = getStrWidth( strftime_buf );
-        drawStr( strftime_buf, (DISPLAY_WIDTH-w)/2, 0, 1, colR, colG, colB );
-        doneDrawing( 1 );
+        drawStrCentered( strftime_buf, 1, rand(), 0xFF000000 );
         // updateFrame();
         vTaskDelay( 1000*60 / portTICK_PERIOD_MS );
     }
@@ -152,9 +165,9 @@ void app_main(){
     // Init rgb tiles
     //------------------------------
     init_rgb();
-    setAll( 0, 0x22, 0x00, 0x00, 0 );
-    setAll( 1, 0x00, 0x22, 0x00, 0 );
-    setAll( 2, 0x00, 0x00, 0x22, 0 );
+    setAll( 0, 0xFF220000 );
+    setAll( 1, 0xFF002200 );
+    setAll( 2, 0xFF000022 );
     updateFrame();
     g_rgbLedBrightness = 70;
 
@@ -170,6 +183,8 @@ void app_main(){
     ESP_LOGI(T,"Starting network infrastructure ...");
     wifi_conn_init();
     xEventGroupWaitBits(wifi_event_group, CONNECTED_BIT, 0, 0, 20000/portTICK_PERIOD_MS);
+    setAll( 2, 0x00000000 );
+    updateFrame();
     vTaskDelay(3000 / portTICK_PERIOD_MS);
 
     //------------------------------
@@ -187,7 +202,7 @@ void app_main(){
     ESP_LOGI(T, "Local Time: %s (%ld)", strftime_buf, time(NULL));
     srand(time(NULL));
 
-    initFont( "/SD/fnt/ubuntu" );
+    initFont( "/SD/fnt/0" );
 
     // //------------------------------
     // // Startup animated background layer
@@ -222,23 +237,26 @@ void app_main(){
         ESP_LOGD(T, "width:               0x%02X", myHeader.width);
         ESP_LOGD(T, "height:              0x%02X", myHeader.height);
         ESP_LOGD(T, "unknowns:            0x%02X", myHeader.unknown0 );
-        // ESP_LOG_BUFFER_HEX( T, myHeader.unknown1, sizeof(myHeader.unknown1) );
-        // ESP_LOGI(T, "frametimes:");
-        // ESP_LOG_BUFFER_HEX( T, myHeader.frameHeader, myHeader.nFrameEntries*2 );
+        ESP_LOG_BUFFER_HEX_LEVEL( T, myHeader.unknown1, sizeof(myHeader.unknown1), ESP_LOG_DEBUG );
+        ESP_LOGD(T, "frametimes:");
+        ESP_LOG_BUFFER_HEX_LEVEL( T, myHeader.frameHeader, myHeader.nFrameEntries*2, ESP_LOG_DEBUG );
         playAni( f, &myHeader );
         free( myHeader.frameHeader );
         myHeader.frameHeader = NULL;
         // Keep a single frame displayed for a bit
         if( myHeader.nStoredFrames<=3 || myHeader.nFrameEntries<=3 ) vTaskDelay( 3000/portTICK_PERIOD_MS );
-        // Fade out the frame
+        // // Fade out the frame
         uint32_t nTouched = 1;
         while( nTouched ){
             startDrawing( 2 );
-            nTouched = incrAlpha( 2, RAND_AB(1,16) );
+            nTouched = fadeOut( 2, RAND_AB(1,50) );
             doneDrawing( 2 );
             // updateFrame();
             vTaskDelay( 20 / portTICK_PERIOD_MS);
         }
+        startDrawing( 2 );
+        setAll( 2, 0x00000000 );    //Make layer fully transparent
+        doneDrawing( 2 );
         vTaskDelay(15000 / portTICK_PERIOD_MS);
     }
     fclose(f);

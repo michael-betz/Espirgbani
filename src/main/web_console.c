@@ -78,7 +78,7 @@ int wsDebugPrintf( const char *format, va_list arg ){
         return 0;
     }
     charBuffer[511] = '\0';
-    cgiWebsockBroadcast("/debug/ws.cgi", charBuffer, charLen+1, WEBSOCK_FLAG_NONE);
+    cgiWebsockBroadcast("/ws.cgi", charBuffer, charLen+1, WEBSOCK_FLAG_NONE);
     // Output to UART as well
     printf( "%s", &charBuffer[1] );
     // // Output to logfile in SPIFFS

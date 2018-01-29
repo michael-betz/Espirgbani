@@ -80,26 +80,26 @@ font_t *loadFntFile( char *fileName ){
 
 // prints (some) content of a font_t object
 void printFntFile( font_t *fDat ){
-    ESP_LOGI(T, "--------------------------------------");
-    ESP_LOGI(T, "fontSize: %d", fDat->info->fontSize );
-    ESP_LOGI(T, "aa: %d", fDat->info->aa );
-    ESP_LOGI(T, "name: %s", fDat->info->fontName );
-    ESP_LOGI(T, "--------------------------------------");
-    ESP_LOGI(T, "lineHeight: %d", fDat->common->lineHeight );
-    ESP_LOGI(T, "scaleW: %d", fDat->common->scaleW );
-    ESP_LOGI(T, "scaleH: %d", fDat->common->scaleH );
-    ESP_LOGI(T, "pages: %d", fDat->common->pages );
-    ESP_LOGI(T, "--------------------------------------");
-    ESP_LOGI(T, "pagenames[0]: %s", fDat->pageNames );
+    ESP_LOGD(T, "--------------------------------------");
+    ESP_LOGD(T, "fontSize: %d", fDat->info->fontSize );
+    ESP_LOGD(T, "aa: %d", fDat->info->aa );
+    ESP_LOGD(T, "name: %s", fDat->info->fontName );
+    ESP_LOGD(T, "--------------------------------------");
+    ESP_LOGD(T, "lineHeight: %d", fDat->common->lineHeight );
+    ESP_LOGD(T, "scaleW: %d", fDat->common->scaleW );
+    ESP_LOGD(T, "scaleH: %d", fDat->common->scaleH );
+    ESP_LOGD(T, "pages: %d", fDat->common->pages );
+    ESP_LOGD(T, "--------------------------------------");
+    ESP_LOGD(T, "pagenames[0]: %s", fDat->pageNames );
     // for( int i=0; i<fDat->pageNamesLen; i++ ){
-    //     ESP_LOGI(T, "%c", fDat->pageNames[i] );
+    //     ESP_LOGD(T, "%c", fDat->pageNames[i] );
     // }
-    ESP_LOGI(T, "--------------------------------------");
+    ESP_LOGD(T, "--------------------------------------");
     int nChars = fDat->charsLen/(int)sizeof(fontChar_t);
-    ESP_LOGI(T, "chars: %d", nChars );
+    ESP_LOGV(T, "chars: %d", nChars );
     for( int i=0; i<nChars; i++ )
-        ESP_LOGI(T, "id: %3d, x: %3d, y: %3d, w: %3d, h: %3d", fDat->chars[i].id, fDat->chars[i].x, fDat->chars[i].y, fDat->chars[i].width, fDat->chars[i].height );
-    ESP_LOGI(T, "--------------------------------------");
+        ESP_LOGV(T, "id: %3d, x: %3d, y: %3d, w: %3d, h: %3d", fDat->chars[i].id, fDat->chars[i].x, fDat->chars[i].y, fDat->chars[i].width, fDat->chars[i].height );
+    ESP_LOGV(T, "--------------------------------------");
 }
 
 // get pointer to fontChar_t for a specific character, or NULL if not found
@@ -146,6 +146,7 @@ void initFont( char *filePrefix ){
         ESP_LOGE(T, "Could not load %s", tempFileName);
         return;
     }
+    printFntFile( g_fontInfo );
     sprintf( tempFileName, "%s_0.bmp", filePrefix );
     ESP_LOGI(T, "Loading %s", tempFileName);
     g_bmpFile = loadBitmapFile( tempFileName, &g_bmpFileHeader, &g_bmpInfoHeader );
@@ -164,7 +165,7 @@ void setCur( uint16_t x, uint16_t y ){
 	g_lastChar = 0;
 }
 
-void drawChar( char c, uint8_t layer, uint8_t r, uint8_t g, uint8_t b ){
+void drawChar( char c, uint8_t layer, uint32_t color, uint8_t isOutline ){
 	if( g_bmpFile==NULL || g_fontInfo==NULL ) return;
 	if( c == '\n' ){
 		cursY += g_fontInfo->common->lineHeight;
@@ -180,27 +181,55 @@ void drawChar( char c, uint8_t layer, uint8_t r, uint8_t g, uint8_t b ){
 							 charInfo->height,
 							 cursX + charInfo->xoffset,
 							 cursY + charInfo->yoffset,
-							 layer, r, g, b );
+							 layer, color, isOutline );
 			cursX += charInfo->xadvance;
 		}
 	}
 	g_lastChar = c;
 }
 
-void drawStr( const char *str, uint16_t x, uint16_t y, uint8_t layer, uint8_t r, uint8_t g, uint8_t b ){
-	ESP_LOGI(T, "(%d,%d): %s", x, y, str );
-    setCur( x, y );
-	while( *str ){
-		drawChar( *str++, layer, r, g, b );
-	}
-}
-
-uint16_t getStrWidth( const char *str ){
-    uint16_t w = 0;
+void getStrDim( const char *str, int16_t *width, int16_t *height ){
+    uint16_t w=0, h=0, temp;
     while( *str ){
         fontChar_t *charInfo = getCharInfo( g_fontInfo, *str );
         w += charInfo->xadvance;
+        temp = charInfo->height + charInfo->yoffset;
+        if( temp > h ) h = temp;
         str++;
     }
-    return( w );
+    if( width != NULL ){
+        *width = w;
+    }
+    if( height != NULL ){
+        *height = h;
+    }
+}
+
+void drawStr( const char *str, uint16_t x, uint16_t y, uint8_t layer, uint32_t cOutline, uint32_t cFill ){
+	const char *c = str;
+    ESP_LOGI(T, "(%d,%d): %s", x, y, str );
+    setCur( x, y );
+	while( *c ){
+        // Render outline first
+		drawChar( *c++, layer, cOutline, 1 );
+	}
+    c = str;
+    setCur( x, y );
+    while( *c ){
+        // Render filling
+        drawChar( *c++, layer, cFill, 0 );
+    }
+}
+
+void drawStrCentered( const char *str, uint8_t layer, uint32_t cOutline, uint32_t cFill ){
+    int16_t w, h, xOff, yOff;
+    getStrDim( str, &w, &h );
+    xOff = (DISPLAY_WIDTH-w)/2;
+    yOff = (DISPLAY_HEIGHT-h)/2;
+    if( xOff < 0 ) xOff=0;
+    if( yOff < 0 ) yOff=0;
+    startDrawing( layer );
+    setAll( layer, 0x00000000 );        
+    drawStr( str, xOff, yOff, layer, cOutline, cFill );
+    doneDrawing( 1 );
 }

@@ -10,9 +10,9 @@
 <script language="javascript" type="text/javascript">
 
   var xhr=j();
-  var wsUri = "ws://"+window.location.host+"/debug/ws.cgi";
+  var wsUri = "ws://"+window.location.host+"/ws.cgi";
   // var wsUri = "ws://velogen/debug/ws.cgi";
-  var output;
+  var output, logLevel, isScroll=true;
   var ansi_up = new AnsiUp;
 
   function nc() {
@@ -35,6 +35,7 @@
 
   function init() {
     output = document.getElementById("output");
+    logLevel = document.getElementById("dbgLevel");
     readFile( "../log.txt" );
     websocket = new WebSocket(wsUri);
     websocket.onopen    = function(evt) { writeToScreen("WS CONNECTED"); };
@@ -46,6 +47,13 @@
       } 
     };
     websocket.onerror   = function(evt) { writeToScreen('ERROR: ' + evt.data); };
+    logLevel.oninput    = function(evt) { websocket.send( logLevel.value ) };
+
+    window.onscroll = function() {
+      var d = document.documentElement;
+      isScroll = d.scrollTop + window.innerHeight === d.offsetHeight;
+    };
+
   }
 
   function writeToScreen(message)
@@ -54,7 +62,9 @@
     var html = ansi_up.ansi_to_html(message);
     pre.innerHTML = html;
     output.appendChild(pre);
-    window.scrollBy(0, 100);
+    if (isScroll) {
+      window.scrollBy(0, 100);
+    }
   }
 
   window.addEventListener("load", init, false);
@@ -64,5 +74,13 @@
 <h1>VeloGen Debug Console</h1>
 <div class="shell-wrap">
   <ul class="shell-body", id="output"></ul>
+  Debug level: 
+  <select id="dbgLevel">
+    <option value="lE">error</option>
+    <option value="lW">warning</option>
+    <option value="lI">info</option>
+    <option value="lD" selected="selected">debug</option>
+    <option value="lV">verbose</option>
+  </select>
 </div>
 </body>

@@ -44,29 +44,49 @@ EventGroupHandle_t wifi_event_group;
 wifiState_t wifiState=WIFI_CON_TO_AP_MODE;
 
 void wsReceive(Websock *ws, char *data, int len, int flags){
-    // ESP_LOGI(T, "wsrx:");
-    // ESP_LOG_BUFFER_HEXDUMP(T, data, len, ESP_LOG_INFO);
-    if( data[0] == 'b' ){
-        uint16_t b = atoi( &data[1] );
-        if( b>1 && b<120 ){
-            switch( brightNessState ){
-                case BR_DAY:
-                    ESP_LOGI(T, "dayBrightness = %d", b);
-                    dayBrightness = b;
-                    break;
-                case BR_NIGHT:
-                    ESP_LOGI(T, "nightBrightness = %d", b);
-                    nightBrightness = b;
-                    break;
+    uint16_t b = 0;
+    ESP_LOGI(T, "wsrx:");
+    ESP_LOG_BUFFER_HEXDUMP(T, data, len, ESP_LOG_INFO);
+    switch( data[0] ){
+        case WS_ID_BRIGHTNESS:
+            // Set brightness level
+            b = atoi( &data[1] );
+            if( b>1 && b<120 ){
+                switch( brightNessState ){
+                    case BR_DAY:
+                        ESP_LOGI(T, "dayBrightness = %d", b);
+                        dayBrightness = b;
+                        break;
+                    case BR_NIGHT:
+                        ESP_LOGI(T, "nightBrightness = %d", b);
+                        nightBrightness = b;
+                        break;
+                }
+                g_rgbLedBrightness = b;
             }
-            g_rgbLedBrightness = b;
-        }
+            break;
+        
+        case WS_ID_LOGLEVEL:
+            // Set log level
+            if( len != 2 )  return;
+            switch( data[1] ){
+                case 'E':   esp_log_level_set("*", ESP_LOG_ERROR);   break;
+                case 'W':   esp_log_level_set("*", ESP_LOG_WARN);    break;
+                case 'I':   esp_log_level_set("*", ESP_LOG_INFO);    break;
+                case 'D':   esp_log_level_set("*", ESP_LOG_DEBUG);   break;
+                case 'V':   esp_log_level_set("*", ESP_LOG_VERBOSE); break;
+            }
+            break;
     }
 }
 
-static void configWsConnect(Websock *ws) {
+// Websocket connected.
+static void wsConnect(Websock *ws) {
     char tempBuff[32];
     int b;
+    uint8_t *rip = ws->conn->remote_ip;
+    ESP_LOGI(T,"WS-client: %d.%d.%d.%d", rip[0], rip[1], rip[2], rip[3] );
+
     ws->recvCb = wsReceive;
     switch( brightNessState ){
         case BR_DAY:
@@ -78,15 +98,9 @@ static void configWsConnect(Websock *ws) {
         default:
             b = 0;
     }
-    sprintf( tempBuff, "b%d", b );
+    sprintf( tempBuff, "%c%d", WS_ID_BRIGHTNESS, b );
     ESP_LOGI(T, "sending b state %s", tempBuff);
     cgiWebsocketSend( ws, tempBuff, strlen(tempBuff), WEBSOCK_FLAG_NONE );
-}
-
-//Debugging Websocket connected.
-static void debugWsConnect(Websock *ws) {
-    uint8_t *rip = ws->conn->remote_ip;
-    ESP_LOGI(T,"debug WS-client: %d.%d.%d.%d", rip[0], rip[1], rip[2], rip[3] );
 }
 
 //------------------------------
@@ -104,15 +118,11 @@ CgiUploadFlashDef uploadParams = {
 const HttpdBuiltInUrl builtInUrls[]={
     // {"*", cgiRedirectApClientToHostname, HOSTNAME},
     {"/", cgiRedirect, "/index.html"},
-    {"/ws.cgi",        cgiWebsocket,            configWsConnect },
-
+    {"/ws.cgi",        cgiWebsocket,            wsConnect },
     {"/debug",         cgiRedirect,             "/debug/index.html" },
-    {"/debug/ws.cgi",  cgiWebsocket,            debugWsConnect },
-
     {"/flash",         cgiRedirect,             "/flash/index.html" },
     {"/flash/upload",  cgiUploadFirmware,       &uploadParams },
     {"/reboot",        cgiRebootFirmware,       NULL },
-
     {"/log.txt",       cgiEspRTC_LOG,           NULL },
     {"/S",             cgiEspFilesListHook,    "/S" },
     {"/SD",            cgiEspFilesListHook,    "/SD"},

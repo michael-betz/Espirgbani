@@ -29,8 +29,8 @@ FILE *loadBitmapFile( char *filename, bitmapFileHeader_t *bitmapFileHeader, bitm
     return filePtr;
 }
 
-// copys a rectangular area from a bitmap to the frambuffer layer
-void copyBmpToFbRect( FILE *bmpF, bitmapInfoHeader_t *bmInfo, uint16_t xBmp, uint16_t yBmp, uint16_t w, uint16_t h, uint16_t xFb, uint16_t yFb, uint8_t layerFb, uint8_t rFb, uint8_t gFb, uint8_t bFb ){
+// copys a rectangular area from a font bitmap to the frambuffer layer
+void copyBmpToFbRect( FILE *bmpF, bitmapInfoHeader_t *bmInfo, uint16_t xBmp, uint16_t yBmp, uint16_t w, uint16_t h, uint16_t xFb, uint16_t yFb, uint8_t layerFb, uint32_t color, uint8_t isOutline ){
     if ( bmpF==NULL || bmInfo==NULL )
         return;
     int rowSize = ( (bmInfo->biBitCount * bmInfo->biWidth + 31)/32 * 4 );       //how many bytes per row
@@ -56,8 +56,12 @@ void copyBmpToFbRect( FILE *bmpF, bitmapInfoHeader_t *bmInfo, uint16_t xBmp, uin
                 break;
             }
             uint8_t shade = rowBuffer[rowAddr];
-            if( shade == 0 )    continue;                   // helps if letters overlay each other
-			setPixel( layerFb, colId+xFb, h-rowId-1+yFb, rFb, gFb, bFb, 255-shade );
+            if( isOutline ){
+                shade = shade > 127 ? 255 : 2*shade;
+            } else {
+                shade = shade > 127 ? 2*shade-255 : 0;
+            }
+            setPixelOver( layerFb, colId+xFb, h-rowId-1+yFb, (shade<<24)|scale32(shade,color) );
 		}
     }
     fseek( bmpF, startPos, SEEK_SET );

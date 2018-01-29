@@ -2,6 +2,9 @@
 #define APP_MAIN_H
 
 #define WS_ID_WEBCONSOLE 'a'
+#define WS_ID_BRIGHTNESS 'b'
+#define WS_ID_LOGLEVEL   'l'
+
 
 #define MIN(a,b) (a<b?a:b)
 #define MAX(a,b) (a>b?a:b)
