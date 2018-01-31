@@ -30,9 +30,13 @@ FILE *loadBitmapFile( char *filename, bitmapFileHeader_t *bitmapFileHeader, bitm
 }
 
 // copys a rectangular area from a font bitmap to the frambuffer layer
-void copyBmpToFbRect( FILE *bmpF, bitmapInfoHeader_t *bmInfo, uint16_t xBmp, uint16_t yBmp, uint16_t w, uint16_t h, uint16_t xFb, uint16_t yFb, uint8_t layerFb, uint32_t color, uint8_t isOutline ){
+void copyBmpToFbRect( FILE *bmpF, bitmapInfoHeader_t *bmInfo, uint16_t xBmp, uint16_t yBmp, uint16_t w, uint16_t h, uint16_t xFb, uint16_t yFb, uint8_t layerFb, uint32_t color, uint8_t chOffset ){
     if ( bmpF==NULL || bmInfo==NULL )
         return;
+    if( chOffset >= bmInfo->biWidth/8 ){
+        ESP_LOGE(T, "There's only %d color channels dude!", bmInfo->biWidth/8 );
+        chOffset = bmInfo->biWidth/8 - 1;
+    }
     int rowSize = ( (bmInfo->biBitCount * bmInfo->biWidth + 31)/32 * 4 );       //how many bytes per row
     uint8_t *rowBuffer = malloc( rowSize );                                     //allocate buffer for one input row
     if( rowBuffer==NULL ){
@@ -55,12 +59,13 @@ void copyBmpToFbRect( FILE *bmpF, bitmapInfoHeader_t *bmInfo, uint16_t xBmp, uin
             if( rowAddr >= rowSize ){
                 break;
             }
-            uint8_t shade = rowBuffer[rowAddr];
-            if( isOutline ){
-                shade = shade > 127 ? 255 : 2*shade;
-            } else {
-                shade = shade > 127 ? 2*shade-255 : 0;
-            }
+            uint8_t shade = rowBuffer[rowAddr+chOffset];
+            // Decoding for packed format (doesn't anti-alias the outline :(
+            // if( isOutline ){
+            //     shade = shade > 127 ? 255 : 2*shade;
+            // } else {
+            //     shade = shade > 127 ? 2*shade-255 : 0;
+            // }
             setPixelOver( layerFb, colId+xFb, h-rowId-1+yFb, (shade<<24)|scale32(shade,color) );
 		}
     }

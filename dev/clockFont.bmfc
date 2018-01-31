@@ -2,8 +2,8 @@
 fileVersion=1
 
 # font settings
-fontName=WillyWonka
-fontFile=fonts/WillyWonka.ttf
+fontName=Xiomara
+fontFile=./fonts/Xiomara-Script.ttf
 charSet=0
 fontSize=-30
 aa=1
@@ -32,15 +32,15 @@ forceZero=0
 # output file
 outWidth=50
 outHeight=2000
-outBitDepth=8
+outBitDepth=32
 fontDescFormat=2
 fourChnlPacked=0
 textureFormat=png
 textureCompression=0
-alphaChnl=2
+alphaChnl=4
 redChnl=0
-greenChnl=0
-blueChnl=0
+greenChnl=1
+blueChnl=3
 invA=0
 invR=0
 invG=0

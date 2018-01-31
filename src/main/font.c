@@ -165,7 +165,7 @@ void setCur( uint16_t x, uint16_t y ){
 	g_lastChar = 0;
 }
 
-void drawChar( char c, uint8_t layer, uint32_t color, uint8_t isOutline ){
+void drawChar( char c, uint8_t layer, uint32_t color, uint8_t chOffset ){
 	if( g_bmpFile==NULL || g_fontInfo==NULL ) return;
 	if( c == '\n' ){
 		cursY += g_fontInfo->common->lineHeight;
@@ -181,7 +181,7 @@ void drawChar( char c, uint8_t layer, uint32_t color, uint8_t isOutline ){
 							 charInfo->height,
 							 cursX + charInfo->xoffset,
 							 cursY + charInfo->yoffset,
-							 layer, color, isOutline );
+							 layer, color, chOffset );
 			cursX += charInfo->xadvance;
 		}
 	}
@@ -210,14 +210,15 @@ void drawStr( const char *str, uint16_t x, uint16_t y, uint8_t layer, uint32_t c
     ESP_LOGI(T, "(%d,%d): %s", x, y, str );
     setCur( x, y );
 	while( *c ){
-        // Render outline first
+        // Render outline first (from green channel)
+        // Note that .bmp color order is  Blue, Green, Red
 		drawChar( *c++, layer, cOutline, 1 );
 	}
     c = str;
     setCur( x, y );
     while( *c ){
-        // Render filling
-        drawChar( *c++, layer, cFill, 0 );
+        // Render filling (from red channel)
+        drawChar( *c++, layer, cFill, 2 );
     }
 }
 

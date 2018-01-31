@@ -66,7 +66,7 @@ void printFntFile( font_t *fDat );
 fontChar_t *getCharInfo( font_t *fDat, char c );
 void freeFntFile( font_t *fDat );
 void initFont( char *filePrefix );
-void drawChar( char c, uint8_t layer, uint32_t color, uint8_t isOutline );
+void drawChar( char c, uint8_t layer, uint32_t color, uint8_t chOffset );
 void setCur( uint16_t x, uint16_t y );
 
 // draws a zero terminated string into `layer` at x,y with colors cOutline and cFill
