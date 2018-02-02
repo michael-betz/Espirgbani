@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdio.h>
+#include <sys/stat.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
 #include "freertos/queue.h"
@@ -233,4 +234,21 @@ void drawStrCentered( const char *str, uint8_t layer, uint32_t cOutline, uint32_
     setAll( layer, 0x00000000 );        
     drawStr( str, xOff, yOff, layer, cOutline, cFill );
     doneDrawing( 1 );
+}
+
+// Returns the number of consecutive `path/0.fnt` files
+int cntFntFiles( char* path ){
+    int nFiles = 0;
+    char fNameBuffer[32];
+    struct stat   buffer;   
+    while( 1 ){
+        sprintf( fNameBuffer, "%s/%d.fnt", path, nFiles );
+        if( stat(fNameBuffer, &buffer) == 0 ) {
+            nFiles++;
+        } else {
+            ESP_LOGW(T, "%s cannot be read", fNameBuffer );
+            break;
+        }
+    }
+    return nFiles;
 }

@@ -38,6 +38,7 @@
 #include "rgb_led_panel.h"
 
 #include "wifi_startup.h"
+#include "font.h"
 
 static const char *T = "WIFI_STARTUP";
 EventGroupHandle_t wifi_event_group;
@@ -77,6 +78,14 @@ void wsReceive(Websock *ws, char *data, int len, int flags){
                 case 'V':   esp_log_level_set("*", ESP_LOG_VERBOSE); break;
             }
             break;
+
+        case WS_ID_FONT:
+            // Set font type (quick and dirty)
+            b = atoi( &data[1] );
+            if( b<g_maxFnt ){
+                g_fontNumberRequest = b;
+            }
+            break;
     }
 }
 
@@ -99,7 +108,8 @@ static void wsConnect(Websock *ws) {
             b = 0;
     }
     sprintf( tempBuff, "%c%d", WS_ID_BRIGHTNESS, b );
-    ESP_LOGI(T, "sending b state %s", tempBuff);
+    cgiWebsocketSend( ws, tempBuff, strlen(tempBuff), WEBSOCK_FLAG_NONE );
+    sprintf( tempBuff, "%c%d", WS_ID_MAXFONT, g_maxFnt );
     cgiWebsocketSend( ws, tempBuff, strlen(tempBuff), WEBSOCK_FLAG_NONE );
 }
 

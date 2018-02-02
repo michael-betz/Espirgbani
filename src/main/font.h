@@ -78,4 +78,7 @@ void getStrDim( const char *str, int16_t *width, int16_t *height );
 // draws a zero terminated string into `layer` centered on the screen with colors cOutline and cFill
 void drawStrCentered( const char *str, uint8_t layer, uint32_t cOutline, uint32_t cFill );
 
+// Returns the number of consecutive `path/0.fnt` files
+int cntFntFiles( char* path );
+
 #endif

@@ -4,6 +4,8 @@
 #define WS_ID_WEBCONSOLE 'a'
 #define WS_ID_BRIGHTNESS 'b'
 #define WS_ID_LOGLEVEL   'l'
+#define WS_ID_FONT       'f'
+#define WS_ID_MAXFONT    'g'
 
 
 #define MIN(a,b) (a<b?a:b)
@@ -16,5 +18,7 @@
 extern int dayBrightness;
 extern int nightBrightness;
 enum {BR_DAY, BR_NIGHT} brightNessState;
+extern int g_maxFnt;	//Max number prefix of the font filename
+extern int g_fontNumberRequest;
 
 #endif

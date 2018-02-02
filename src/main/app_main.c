@@ -17,7 +17,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-#include <sys/stat.h>
 #include "esp_log.h"
 #include "wifi_startup.h"
 #include "web_console.h"
@@ -34,6 +33,9 @@ static const char *T = "MAIN_APP";
 
 int dayBrightness = 70;
 int nightBrightness = 2;
+
+int g_maxFnt = 0;
+int g_fontNumberRequest = -1;
 
 void drawTestAnimationFrame(){
     static int frm=0;
@@ -124,23 +126,6 @@ void playAni( FILE *f, headerEntry_t *h ){
     }
 }
 
-// Returns the number of consecutive `path/0.fnt` files
-int cntFntFiles( char* path ){
-    int nFiles = 0;
-    char fNameBuffer[32];
-    struct stat   buffer;   
-    while( 1 ){
-        sprintf( fNameBuffer, "%s/%d.fnt", path, nFiles );
-        if( stat(fNameBuffer, &buffer) == 0 ) {
-            nFiles++;
-        } else {
-            ESP_LOGW(T, "%s cannot be read", fNameBuffer );
-            break;
-        }
-    }
-    return nFiles;
-}
-
 void aniClockTask(void *pvParameters){
     time_t now = 0;
     // uint32_t colFill = 0xFF880088;
@@ -150,12 +135,11 @@ void aniClockTask(void *pvParameters){
     char strftime_buf[64];
     srand(time(NULL));
     ESP_LOGI(T,"aniClockTask started");
-    int maxFnt = cntFntFiles("/SD/fnt") - 1;
-    ESP_LOGI(T,"max. font file: /SD/fnt/%d.fnt", maxFnt );
+    g_maxFnt = cntFntFiles("/SD/fnt") - 1;
+    ESP_LOGI(T,"max. font file: /SD/fnt/%d.fnt", g_maxFnt );
     while(1){
         if( timeinfo.tm_min==0 ){
-            sprintf( strftime_buf, "/SD/fnt/%d", RAND_AB(0,maxFnt) );
-            initFont( strftime_buf );
+            g_fontNumberRequest = RAND_AB(0,g_maxFnt);
             if( timeinfo.tm_hour>=23 || timeinfo.tm_hour<=7 ){
                 brightNessState = BR_NIGHT;
                 g_rgbLedBrightness = nightBrightness;
@@ -163,6 +147,11 @@ void aniClockTask(void *pvParameters){
                 brightNessState = BR_DAY;
                 g_rgbLedBrightness = dayBrightness;
             }
+        }
+        if( g_fontNumberRequest >=0 ){
+            sprintf( strftime_buf, "/SD/fnt/%d", g_fontNumberRequest );
+            initFont( strftime_buf );
+            g_fontNumberRequest = -1;
         }
         time(&now);       
         localtime_r(&now, &timeinfo);
