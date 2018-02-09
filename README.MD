@@ -43,7 +43,7 @@ Format as FAT32, then copy the following files:
   
 ## how to get the font `.bmp` and `.fnt` files
   * Find some nice fonts which look good at small size and copy the `.ttf` files into the git tree at `./dev/fonts`
-  * Use [bmFont](www.angelcode.com/products/bmfont/) (works well with wine in linux) to generate the bitmap fonts. Good settings are provided in `dev/clockFont.bmfc`
+  * Use [bmFont](http://www.angelcode.com/products/bmfont/) (works well with wine in linux) to generate the bitmap fonts. Good settings are provided in `dev/clockFont.bmfc`
     * .png output file
     * .fnt binary file
     * 1 pixel backed in outline
