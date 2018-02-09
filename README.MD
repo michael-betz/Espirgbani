@@ -50,4 +50,4 @@ Format as FAT32, then copy the following files:
     * 32 bit per pixel (G = filling, B = outline)
   * Use imagemagick to convert all image files to bmp format
   * Rename them to 0_0.bmp, 0.fnt;  1_0.bmp, 1.fnt, ...
-  * Alternatively, run `generateFonts.sh` which should automate these steps
+  * Alternatively, run `./dev/generateFonts.sh` which should automate these steps
