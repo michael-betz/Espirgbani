@@ -6,13 +6,12 @@ Work in progress. [Some writeup here](http://yetifrisstlama.blogspot.com/2018/02
 
 # PCB
 Fits inside one of the 64x32 panels.
-![front](https://github.com/yetifrisstlama/Espirgbani/raw/master/pcb/1.png)
 
 ![back](https://github.com/yetifrisstlama/Espirgbani/raw/master/pcb/2.png)
 
 ![wiring](https://github.com/yetifrisstlama/Espirgbani/raw/master/pcb/back.jpg)
 
-## TODO
+### TODO
   * Change programming port from custom pogo-pins to a normal header
   * Add an ambient light level sensor
   * Re-arrange the mounting holes
@@ -38,16 +37,17 @@ Format as FAT32, then copy the following files:
   * Find a run-dmd image file and write it to SD card according to their instructions (HDD Raw Copy Tool and Windows required)
   * In linux, dump the first few hundred megabytes of the SD card to a file: 
   ```bash
-  sudo dd ...
+  sudo dd if=/dev/sdb of=./runDmd.img bs=1M count=125
   ```
   
 ## how to get the font `.bmp` and `.fnt` files
   * Find some nice fonts which look good at small size and copy the `.ttf` files into the git tree at `./dev/fonts`
   * Use [bmFont](http://www.angelcode.com/products/bmfont/) (works well with wine in linux) to generate the bitmap fonts. Good settings are provided in `dev/clockFont.bmfc`
-    * .png output file
-    * .fnt binary file
-    * 1 pixel backed in outline
-    * 32 bit per pixel (G = filling, B = outline)
+    * Width: 52, Height: 2000
+    * 32 bit per pixel (A = one, R = glyph, G = outline, B = zero)
+    * .png texture file
+    * binary .fnt descriptor file
+    * Size: 30 px, Outline thickness: 1 px
   * Use imagemagick to convert all image files to bmp format
   * Rename them to 0_0.bmp, 0.fnt;  1_0.bmp, 1.fnt, ...
   * Alternatively, run `./dev/generateFonts.sh` which should automate these steps
