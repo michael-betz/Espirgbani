@@ -30,7 +30,7 @@ useFixedHeight=0
 forceZero=0
 
 # output file
-outWidth=50
+outWidth=52
 outHeight=2000
 outBitDepth=32
 fontDescFormat=2
@@ -47,7 +47,7 @@ invG=0
 invB=0
 
 # outline
-outlineThickness=2
+outlineThickness=1.5
 
 # selected chars
 chars=32-122

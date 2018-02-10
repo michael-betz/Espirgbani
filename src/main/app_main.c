@@ -31,7 +31,7 @@
 
 static const char *T = "MAIN_APP";
 
-int dayBrightness = 70;
+int dayBrightness = 20;
 int nightBrightness = 2;
 
 int g_maxFnt = 0;
@@ -91,14 +91,15 @@ void aniBackgroundTask(void *pvParameters){
                 vTaskDelay( 10 / portTICK_PERIOD_MS );
         }
         updateFrame();
-        if( (frameCount%10000) == 0 ){
+        if( (frameCount%10000)==0 ){
             aniMode = RAND_AB(0,2);
             if( aniMode == 0 ){
-                setAll( 0, 0xFF000000 );
+                int tempColor = scale32( 128, rand() ) | 0xFF000000;
+                setAll( 0, tempColor );
             }
         }
         frameCount++;
-        vTaskDelay( 20 / portTICK_PERIOD_MS );
+        vTaskDelay( 10 / portTICK_PERIOD_MS );
     }
     vTaskDelete( NULL );
 }

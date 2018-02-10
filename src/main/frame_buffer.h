@@ -6,25 +6,15 @@
 
 #define BLEND_LAYERS(t,m,b) ( (t*(255-m)+b*m)/255 )
 
-#define FULL_BLEND_COL(ca,aa,cb,ab) ( (ca*aa+cb*ab*(255-aa)) / (aa+ab*(255-aa)) )
-#define FULL_BLEND_A(aa,ab)     ( (aa+ab*(255-aa)) )
-#define FULL_BLEND_RGBA(a,b)    SRGBA( 										 \
-									FULL_BLEND_COL(GR(a),GA(a),GR(b),GA(b)), \
-									FULL_BLEND_COL(GG(a),GA(a),GG(b),GA(b)), \
-									FULL_BLEND_COL(GB(a),GA(a),GB(b),GA(b)), \
-									FULL_BLEND_A(  GA(a),GA(b)            )  \
-								)
-
-
 // Fast integer `scaling` a*b (255*255=255)
 // from http://stereopsis.com/doubleblend.html
-// #define INT_MULT(a,b)        ( ((a)+1)*(b) >> 8 )
-// #define INT_PRELERP(p, q, a) ( (p) + (q) - INT_MULT(a, p) )
+#define INT_MULT(a,b,t)        ( ((a)+1)*(b) >> 8 )
+#define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT(a, p, 0) )
 
 // from http://www.cs.princeton.edu/courses/archive/fall00/cs426/papers/smith95a.pdf
 // t = 16 bit temporary variable.
-#define INT_MULT(a,b,t) ( (t)=(a)*(b)+0x80, ( (((t)>>8)+(t))>>8 ) )
-#define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
+// #define INT_MULT(a,b,t) ( (t)=(a)*(b)+0x80, ( (((t)>>8)+(t))>>8 ) )
+// #define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
 // B over A (premultipied alpha):  C' = INT_PRELERP( A', B', beta, t )
 
 //Scales all 4 components in p with the same scaling factor scale (255*255=255)
