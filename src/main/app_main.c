@@ -31,9 +31,6 @@
 
 static const char *T = "MAIN_APP";
 
-int dayBrightness = 20;
-int nightBrightness = 2;
-
 int g_maxFnt = 0;
 int g_fontNumberRequest = -1;
 
@@ -127,6 +124,28 @@ void playAni( FILE *f, headerEntry_t *h ){
     }
 }
 
+void manageBrightness( char* tStr ){
+    cJSON *jPow = jGet( getSettings(), "power");
+    cJSON *jHi  = jGet( jPow, "hi");
+    cJSON *jLo  = jGet( jPow, "lo");
+    switch( brightNessState ){
+        case BR_NIGHT:
+            if ( strcmp( jGetS(jHi,"t"), tStr) == 0 ) {
+                brightNessState = BR_DAY;
+                g_rgbLedBrightness = jGetI(jHi,"p");
+                ESP_LOGI(T, "jHi: %s p = %d", jGetS(jHi,"t"), jGetI(jHi,"p") );
+            }
+            break;
+        case BR_DAY:
+            if(  strcmp( jGetS(jLo,"t"), tStr) == 0 ){
+                brightNessState = BR_NIGHT;
+                g_rgbLedBrightness = jGetI(jLo,"p");
+                ESP_LOGI(T, "jLo: %s p = %d", jGetS(jLo,"t"), jGetI(jLo,"p") );
+            }
+            break;
+    }
+}
+
 void aniClockTask(void *pvParameters){
     time_t now = 0;
     // uint32_t colFill = 0xFF880088;
@@ -140,15 +159,10 @@ void aniClockTask(void *pvParameters){
     ESP_LOGI(T,"max. font file: /SD/fnt/%d.fnt", g_maxFnt );
     while(1){
         if( timeinfo.tm_min==0 ){
+            // every hour
             g_fontNumberRequest = RAND_AB(0,g_maxFnt);
-            if( timeinfo.tm_hour>=23 || timeinfo.tm_hour<=7 ){
-                brightNessState = BR_NIGHT;
-                g_rgbLedBrightness = nightBrightness;
-            } else {
-                brightNessState = BR_DAY;
-                g_rgbLedBrightness = dayBrightness;
-            }
         }
+        // every minute
         if( g_fontNumberRequest >=0 ){
             sprintf( strftime_buf, "/SD/fnt/%d", g_fontNumberRequest );
             initFont( strftime_buf );
@@ -158,6 +172,7 @@ void aniClockTask(void *pvParameters){
         localtime_r(&now, &timeinfo);
         strftime(strftime_buf, sizeof(strftime_buf), "%H:%M", &timeinfo);
         drawStrCentered( strftime_buf, 1, rand(), 0xFF000000 );
+        manageBrightness( strftime_buf );
         // updateFrame();
         vTaskDelay( 1000*60 / portTICK_PERIOD_MS );
     }
@@ -168,6 +183,7 @@ void app_main(){
     //------------------------------
     // Enable RAM log file
     //------------------------------
+    esp_log_level_set( "*", ESP_LOG_WARN );
     esp_log_set_vprintf( wsDebugPrintf );
 
     //------------------------------
@@ -195,6 +211,8 @@ void app_main(){
     setAll( 2, 0x00000000 );
     updateFrame();
     vTaskDelay(3000 / portTICK_PERIOD_MS);
+
+    reloadSettings();
 
     //------------------------------
     // Set the clock / print time

@@ -9,7 +9,7 @@
 // Fast integer `scaling` a*b (255*255=255)
 // from http://stereopsis.com/doubleblend.html
 #define INT_MULT(a,b,t)        ( ((a)+1)*(b) >> 8 )
-#define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT(a, p, 0) )
+#define INT_PRELERP(p, q, a)   ( (p) + (q) - INT_MULT(a, p, 0) )
 
 // from http://www.cs.princeton.edu/courses/archive/fall00/cs426/papers/smith95a.pdf
 // t = 16 bit temporary variable.

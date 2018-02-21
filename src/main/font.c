@@ -246,7 +246,6 @@ int cntFntFiles( char* path ){
         if( stat(fNameBuffer, &buffer) == 0 ) {
             nFiles++;
         } else {
-            ESP_LOGW(T, "%s cannot be read", fNameBuffer );
             break;
         }
     }

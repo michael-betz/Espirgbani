@@ -3,14 +3,19 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
+#include "libesphttpd/esp.h"
+#include "libesphttpd/httpd.h"
+#include "cJSON.h"
 
+
+#define SETTINGS_FILE	"/SD/settings.json"
 #define N_WIFI_TRYS		6
 #define WIFI_DELAY		10000	//[ms]
-#define HOSTNAME 		"espirgbani"
+
+#define GET_HOSTNAME() jGetSD(getSettings(),"hostname","espirgbani")
 
 #define CONNECTED_BIT 	BIT0
 #define STA_START_BIT	BIT1
-
 
 typedef enum {
     WIFI_CON_TO_AP_MODE,
@@ -26,5 +31,19 @@ extern wifiState_t wifiState;
 
 extern void wifi_conn_init(void);
 extern void wifi_disable();
+
+#define jGet( a,b)  cJSON_GetObjectItemCaseSensitive(a,b)
+#define jGetI(a,b) (cJSON_GetObjectItemCaseSensitive(a,b)->valueint)
+#define jGetD(a,b) (cJSON_GetObjectItemCaseSensitive(a,b)->valuedouble)
+#define jGetS(a,b) (cJSON_GetObjectItemCaseSensitive(a,b)->valuestring)
+// Returns a fallback string on json error
+const char *jGetSD( const cJSON *j, const char *sName, const char *sDefault );
+
+// Returns the `settings.json` singleton object
+cJSON *getSettings();
+// Reloads the settings singleton
+void reloadSettings();
+// The webserver callbakc
+CgiStatus cgiReloadSettings(HttpdConnData *connData);
 
 #endif

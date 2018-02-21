@@ -2,7 +2,6 @@
 #define APP_MAIN_H
 
 #define WS_ID_WEBCONSOLE 'a'
-#define WS_ID_BRIGHTNESS 'b'
 #define WS_ID_LOGLEVEL   'l'
 #define WS_ID_FONT       'f'
 #define WS_ID_MAXFONT    'g'

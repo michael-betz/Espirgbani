@@ -9,16 +9,10 @@
 	A Pinball LED clock
 	<ul>
 	<li><a href="/debug">Debug console</a></li>
+  <li><a href="settings.html">Configuration</a></li>
 	<li><a href="/flash">OTA firmware update</a></li>
 	</ul>
 	</p>
-	<div class="slidecontainer">
-		Brightness:
-		<input type="range" min="2" max="120" value="0" class="slider" id="brightSlider">
-	</div>
-  <div id="brightOutput">
-    ???
-  </div>  
   <div class="slidecontainer">
     Font:
     <input type="range" min="0" max="15" value="0" class="slider" id="fontSlider">
@@ -34,19 +28,14 @@
   var brightSlider, fontSlider;
 
   function init() {
-    brightOutput = document.getElementById("brightOutput");
     fontOutput = document.getElementById("fontOutput");
-    brightSlider = document.getElementById("brightSlider");
     fontSlider = document.getElementById("fontSlider");
     websocket = new WebSocket(wsUri);
     websocket.onopen    = function(evt) { console.log("WS CONNECTED");    };
     websocket.onclose   = function(evt) { console.log("WS DISCONNECTED"); };
     websocket.onmessage = function(evt) { 
       console.log("dat: " + evt.data);
-      if(evt.data[0]=='b'){ 
-        brightSlider.value = evt.data.slice(1);
-        brightOutput.innerHTML = evt.data.slice(1);
-      } else if (evt.data[0]=='f'){ 
+      if (evt.data[0]=='f'){ 
         fontSlider.value = evt.data.slice(1);
         fontOutput.innerHTML = evt.data.slice(1);
       } else if (evt.data[0]=='g'){ 
@@ -54,11 +43,6 @@
       } 
     };
     websocket.onerror   = function(evt) { console.log("WS ERROR: "+evt); };
-    brightSlider.oninput = function() {
-      // Update the current slider value (each time you drag the slider handle)
-      brightOutput.innerHTML = this.value;
-      websocket.send("b" + this.value);
-    }
     fontSlider.oninput = function() {
       // Update the current slider value (each time you drag the slider handle)
       fontOutput.innerHTML = this.value;

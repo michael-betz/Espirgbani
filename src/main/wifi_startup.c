@@ -49,24 +49,6 @@ void wsReceive(Websock *ws, char *data, int len, int flags){
     ESP_LOGI(T, "wsrx:");
     ESP_LOG_BUFFER_HEXDUMP(T, data, len, ESP_LOG_INFO);
     switch( data[0] ){
-        case WS_ID_BRIGHTNESS:
-            // Set brightness level
-            b = atoi( &data[1] );
-            if( b>1 && b<120 ){
-                switch( brightNessState ){
-                    case BR_DAY:
-                        ESP_LOGI(T, "dayBrightness = %d", b);
-                        dayBrightness = b;
-                        break;
-                    case BR_NIGHT:
-                        ESP_LOGI(T, "nightBrightness = %d", b);
-                        nightBrightness = b;
-                        break;
-                }
-                g_rgbLedBrightness = b;
-            }
-            break;
-        
         case WS_ID_LOGLEVEL:
             // Set log level
             if( len != 2 )  return;
@@ -92,23 +74,9 @@ void wsReceive(Websock *ws, char *data, int len, int flags){
 // Websocket connected.
 static void wsConnect(Websock *ws) {
     char tempBuff[32];
-    int b;
     uint8_t *rip = ws->conn->remote_ip;
     ESP_LOGI(T,"WS-client: %d.%d.%d.%d", rip[0], rip[1], rip[2], rip[3] );
-
     ws->recvCb = wsReceive;
-    switch( brightNessState ){
-        case BR_DAY:
-            b = dayBrightness;
-            break;
-        case BR_NIGHT:
-            b = nightBrightness;
-            break;
-        default:
-            b = 0;
-    }
-    sprintf( tempBuff, "%c%d", WS_ID_BRIGHTNESS, b );
-    cgiWebsocketSend( ws, tempBuff, strlen(tempBuff), WEBSOCK_FLAG_NONE );
     sprintf( tempBuff, "%c%d", WS_ID_MAXFONT, g_maxFnt );
     cgiWebsocketSend( ws, tempBuff, strlen(tempBuff), WEBSOCK_FLAG_NONE );
 }
@@ -133,6 +101,7 @@ const HttpdBuiltInUrl builtInUrls[]={
     {"/flash",         cgiRedirect,             "/flash/index.html" },
     {"/flash/upload",  cgiUploadFirmware,       &uploadParams },
     {"/reboot",        cgiRebootFirmware,       NULL },
+    {"/reload",        cgiReloadSettings,       NULL },
     {"/log.txt",       cgiEspRTC_LOG,           NULL },
     {"/S",             cgiEspFilesListHook,    "/S" },
     {"/SD",            cgiEspFilesListHook,    "/SD"},
@@ -146,8 +115,8 @@ static esp_err_t wifi_event_handler(void *ctx, system_event_t *event)
 {  
     switch(event->event_id) {
         case SYSTEM_EVENT_STA_START:
-            tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_STA, HOSTNAME);
-            tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_AP,  HOSTNAME);
+            tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_STA, GET_HOSTNAME());
+            tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_AP,  GET_HOSTNAME());
             tcpip_adapter_dns_info_t dnsIp;
             ipaddr_aton("192.168.4.1", &dnsIp.ip );
             ESP_ERROR_CHECK( tcpip_adapter_set_dns_info(TCPIP_ADAPTER_IF_AP, TCPIP_ADAPTER_DNS_MAIN, &dnsIp) );
@@ -209,10 +178,59 @@ cJSON *readJsonDyn( char* fName ){
         return NULL;
     }
     if( !(root = cJSON_Parse( txtData )) ){
-        ESP_LOGE(T,"No data in %s", fName );
+        ESP_LOGE(T,"JSON Error in %s", fName );
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            ESP_LOGE(T, "Error before: %s", error_ptr);
+        }
     }
     free( txtData );
     return root;
+}
+
+cJSON *g_settings = NULL;
+cJSON *getSettings(){
+    if (!g_settings) {
+        g_settings = readJsonDyn( SETTINGS_FILE );
+        if( g_settings ){
+            ESP_LOGI(T, "Loaded %s:", SETTINGS_FILE);
+        } else {
+            ESP_LOGE(T, "Error loading %s", SETTINGS_FILE);
+        }
+    }
+    return g_settings;
+}
+
+const char *jGetSD( const cJSON *j, const char *sName, const char *sDefault ){
+    const cJSON *jTemp = cJSON_GetObjectItemCaseSensitive( j, sName );
+    if( !cJSON_IsString(jTemp) ){
+        ESP_LOGE(T, "json error: %s is not a string, falling back to %s", sName, sDefault);
+        return sDefault;
+    }
+    return jTemp->valuestring;
+}
+
+void reloadSettings(){
+    if (g_settings) {
+        cJSON_Delete(g_settings);
+        g_settings = NULL;
+    }
+}
+
+// Handle request to reload settings
+CgiStatus ICACHE_FLASH_ATTR cgiReloadSettings(HttpdConnData *connData) {
+    if (connData->conn==NULL) {
+        //Connection aborted. Clean up.
+        return HTTPD_CGI_DONE;
+    }
+    reloadSettings();
+    httpdStartResponse(connData, 200);
+    httpdHeader(connData, "Content-Type", "text/plain");
+    httpdEndHeaders(connData);
+    char *str = cJSON_Print(getSettings());
+    httpdSend(connData, str, strlen(str));
+    free(str);
+    return HTTPD_CGI_DONE;
 }
 
 int getKnownApPw( wifi_ap_record_t *foundAps, uint16_t foundNaps, uint8_t *ssid, uint8_t *pw ){
@@ -223,7 +241,7 @@ int getKnownApPw( wifi_ap_record_t *foundAps, uint16_t foundNaps, uint8_t *ssid,
     // See if there are any known wifis
     //---------------------------------------------------
     // Index json file by key (ssid)
-    cJSON *jRoot=NULL, *jWifi=NULL, *jTemp=NULL;
+    const cJSON *jWifis=NULL, *jWifi=NULL;
     wifi_ap_record_t *currAp=NULL;
     int i;
     ESP_LOGI(T, "\n------------------ Found %d wifis --------------------", foundNaps );
@@ -231,37 +249,21 @@ int getKnownApPw( wifi_ap_record_t *foundAps, uint16_t foundNaps, uint8_t *ssid,
         ESP_LOGI(T, "ch: %2d, ssid: %16s, bssid: %02x:%02x:%02x:%02x:%02x:%02x, rssi: %d", currAp->primary, (char*)currAp->ssid, currAp->bssid[0], currAp->bssid[1], currAp->bssid[2], currAp->bssid[3], currAp->bssid[4], currAp->bssid[5], currAp->rssi );
         currAp++;
     }
-    if( (jRoot = readJsonDyn("/SD/knownWifis.json")) ){
-        // Go through all found APs, use ssid as key and try to get item from json
-        for( i=0,currAp=foundAps; i<foundNaps; i++ ){
-            jWifi = cJSON_GetObjectItem( jRoot, (char*)currAp->ssid);
-            currAp++;
-            if ( !jWifi ){
-                continue;
-            }
-            if( !(jTemp = cJSON_GetObjectItem( jWifi, "type" )) || (jTemp->type!=cJSON_String) ){
-                ESP_LOGE(T, "Wifi type undefined");
-                continue;
-            }
-            if( strcmp(jTemp->valuestring, "full") != 0 ){
-                ESP_LOGW(T, "Skipping %s due to unsupported Wifi type %s", currAp->ssid, jTemp->valuestring );
-                continue;
-            }
-            //---------------------------------------------------
-            // Found a known good WIFI, connect to it ...
-            //---------------------------------------------------
-            ESP_LOGW(T,"match: %s, trying to connect ...", jWifi->string );
-            strcpy( (char*)ssid, jWifi->string );
-            if( !(jTemp = cJSON_GetObjectItem( jWifi, "pw" )) || (jTemp->type!=cJSON_String) ){
-                ESP_LOGE(T, "Wifi pw undefined");
-                strcpy( (char*)pw,   "" );
-            } else {
-                strcpy( (char*)pw,   jTemp->valuestring );
-            }
-            cJSON_Delete( jRoot ); jRoot = NULL;
-            return 0;
+    jWifis = cJSON_GetObjectItemCaseSensitive( getSettings(), "wifis");
+    // Go through all found APs, use ssid as key and try to get item from json
+    for( i=0,currAp=foundAps; i<foundNaps; i++ ){
+        jWifi = cJSON_GetObjectItemCaseSensitive( jWifis, (char*)currAp->ssid);
+        currAp++;
+        if ( !cJSON_IsObject(jWifi) ){
+            continue;
         }
-        cJSON_Delete( jRoot ); jRoot = NULL;
+        //---------------------------------------------------
+        // Found a known good WIFI, connect to it ...
+        //---------------------------------------------------
+        ESP_LOGW(T,"match: %s, trying to connect ...", jWifi->string );
+        strcpy( (char*)ssid, jWifi->string );
+        strcpy( (char*)pw, jGetSD(jWifi,"pw","") );
+        return 0;
     }
     return -1;
 }
@@ -316,13 +318,13 @@ void conToApMode(){
 
 void startHotspotMode(){
     wifi_config_t wifi_config = {
-        .ap.ssid = HOSTNAME,
         .ap.password = "",
         .ap.channel = 5,
         .ap.authmode = WIFI_AUTH_OPEN,
         .ap.max_connection = 4,
         .ap.beacon_interval = 100
     };
+    strcpy( (char*)wifi_config.ap.ssid, GET_HOSTNAME() );
     ESP_LOGI(T, "WIFI_HOTSPOT_MODE");
     ESP_ERROR_CHECK( esp_wifi_stop() );
     ESP_ERROR_CHECK( esp_wifi_set_mode( WIFI_MODE_AP ) );
@@ -339,7 +341,6 @@ void wifiConnectionTask(void *pvParameters){
     //------------------------------
     ESP_ERROR_CHECK( espFsInit((void*)(webpages_espfs_start)) );
     ESP_ERROR_CHECK( httpdInit(builtInUrls, 80, 0) );
-    ESP_LOGW(T,"FW 1, RAM left %d\n", esp_get_free_heap_size() );
     captdnsInit();
 
     while(1){
@@ -407,19 +408,6 @@ void wifiConnectionTask(void *pvParameters){
 
             case WIFI_IDLE:
             default:
-                //---------------------------------------------------
-                // Do nothing (wheel ticks should keep it alive)
-                //---------------------------------------------------
-                // if( ++wifiTry > N_WIFI_TRYS ){
-                //     ESP_LOGW(T, "Going to deep sleep ...");
-                //     wifiTry = 0;
-                //     // go to deep sleep
-                //     // rtc_gpio_pullup_dis( GPIO_SPEED_PLS );
-                //     // rtc_gpio_pulldown_dis( GPIO_SPEED_PLS );
-                //     rtc_gpio_pullup_en( GPIO_SPEED_PLS );
-                //     ESP_ERROR_CHECK( esp_sleep_enable_ext0_wakeup( GPIO_SPEED_PLS, 0 ) );
-                //     esp_deep_sleep_start();
-                // }
                 vTaskDelay( WIFI_DELAY/portTICK_PERIOD_MS );
                 break;
         } // switch

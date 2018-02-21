@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+
+<meta charset="utf-8" />
+<script src="./flash/140medley.min.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="./style.css">
+
+<title>.json Settings</title>
+
+<script language="javascript" type="text/javascript">
+  var xhr=j();
+  var textArea, bnA, tStat;
+  var settingsFileName = "./SD/settings.json";
+
+  function nc() {
+    return "?nocache="+Math.floor(Math.random()*100000).toString();
+  }
+
+  function readFile( fName, v=false ){
+    console.log("GETing: "+fName);
+    xhr.open("GET", fName );
+    xhr.onreadystatechange=function() {
+      if (xhr.readyState==4 && xhr.status>=200 && xhr.status<300) {
+        textArea.value = xhr.responseText;
+        if (v) {
+          prettyPrint();
+        }
+      }
+    }
+    xhr.send();
+  }
+
+  function writeFile() {
+    bnA.disabled = true;
+    fName = settingsFileName;
+    console.log("POSTing: "+fName);
+    xhr.open("POST", fName );
+    xhr.onreadystatechange=function() {
+      if (xhr.readyState==4 && xhr.status>=200 && xhr.status<300) {
+        tStat.innerHTML = "<font color=#88FF88> done (" + xhr.statusText + ") </font>";
+        readFile( "./reload" );
+      }
+    }
+    xhr.send( textArea.value );
+  }
+
+  function init() {
+    textArea = document.getElementById("myTextArea");
+    bnA = document.getElementById("bnA");
+    tStat = document.getElementById("tStat");
+    readFile( settingsFileName + nc(), true );
+  }
+
+  function prettyPrint() {
+      s = textArea.value;
+      try {
+        var obj = JSON.parse( s );
+        textArea.value = JSON.stringify(obj, undefined, 4);
+        bnA.disabled = false;
+        tStat.innerHTML = "<font color=#888888>Verified OK</font>";
+      } catch(e){
+        bnA.disabled = true;
+        var ar = e.message.split(" ");
+        var pos = parseInt(ar[ar.length-1]);
+        textArea.focus();
+        textArea.selectionStart = pos;
+        textArea.selectionEnd = pos;
+        tStat.innerHTML = "<font color=#FF8888>" + e.message + "</font>";
+      }     
+  }
+
+window.addEventListener("load", init, false);
+</script>
+
+<body>
+<h1>.json Settings</h1>
+<div class="shell-wrap">
+  <textarea id="myTextArea" class="shell-body" onkeyup="bnA.disabled=true; tStat.innerText='';"></textarea>
+  <br>
+  <button id="bnV" class="inline" onclick="prettyPrint();">Verify</button>
+  <button id="bnA" class="inline" onclick="writeFile();">Apply</button>
+  <p id="tStat" class="inline"></p>
+</div>
+</body>

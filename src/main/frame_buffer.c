@@ -59,11 +59,9 @@ uint32_t getBlendedPixel( int x, int y ) {
     uint8_t resR=0, resG=0, resB=0;
     for( uint8_t l=0; l<N_LAYERS; l++ ){
         uint32_t p = g_frameBuff[l][x+y*DISPLAY_WIDTH]; // Get a pixel value of one layer
-        uint16_t t;
-        // C’ = INT_PRELERP( A’, B’, β, t )
-        resR = INT_PRELERP( resR, GR(p), GA(p), t );
-        resG = INT_PRELERP( resG, GG(p), GA(p), t );
-        resB = INT_PRELERP( resB, GB(p), GA(p), t );
+        resR = INT_PRELERP( resR, GR(p), GA(p) );
+        resG = INT_PRELERP( resG, GG(p), GA(p) );
+        resB = INT_PRELERP( resB, GB(p), GA(p) );
     }
     return (resB<<16) | (resG<<8) | resR;
 }
@@ -77,11 +75,10 @@ void setPixel( uint8_t layer, uint16_t x, uint16_t y, uint32_t color ) {
 void setPixelOver( uint8_t layer, uint16_t x, uint16_t y, uint32_t color ) {
     if( x>=DISPLAY_WIDTH || y>=DISPLAY_HEIGHT || layer>=N_LAYERS ){ return; }
     uint32_t p = g_frameBuff[layer][x+y*DISPLAY_WIDTH];
-    uint16_t t;
-    uint8_t resR = INT_PRELERP( GR(p), GR(color), GA(color), t );
-    uint8_t resG = INT_PRELERP( GG(p), GG(color), GA(color), t );
-    uint8_t resB = INT_PRELERP( GB(p), GB(color), GA(color), t );
-    uint8_t resA = INT_PRELERP( GA(p), GA(color), GA(color), t );
+    uint8_t resR = INT_PRELERP( GR(p), GR(color), GA(color) );
+    uint8_t resG = INT_PRELERP( GG(p), GG(color), GA(color) );
+    uint8_t resB = INT_PRELERP( GB(p), GB(color), GA(color) );
+    uint8_t resA = INT_PRELERP( GA(p), GA(color), GA(color) );
     g_frameBuff[layer][x+y*DISPLAY_WIDTH] = SRGBA( resR, resG, resB, resA );
 }
 
