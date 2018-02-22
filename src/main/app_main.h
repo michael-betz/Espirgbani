@@ -14,8 +14,6 @@
 // Random number within the range [a,b]
 #define RAND_AB(a,b) (rand()%(b+1-a)+a)
 
-extern int dayBrightness;
-extern int nightBrightness;
 enum {BR_DAY, BR_NIGHT} brightNessState;
 extern int g_maxFnt;	//Max number prefix of the font filename
 extern int g_fontNumberRequest;

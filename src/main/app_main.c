@@ -20,86 +20,19 @@
 #include "esp_log.h"
 #include "wifi_startup.h"
 #include "web_console.h"
-#include "libnsgif/libnsgif.h"
 #include "rgb_led_panel.h"
 #include "sdcard.h"
 #include "animations.h"
 #include "frame_buffer.h"
 #include "bmp.h"
 #include "font.h"
+#include "shaders.h"
 #include "app_main.h"
 
 static const char *T = "MAIN_APP";
 
 int g_maxFnt = 0;
 int g_fontNumberRequest = -1;
-
-void drawTestAnimationFrame(){
-    static int frm=0;
-    static uint16_t aniZoom=0x04, boost=7;
-    startDrawing( 0 );
-    for( int y=0; y<=31; y++ )
-        for( int x=0; x<=127; x++ )
-            setPixel( 0, x, y, SRGBA( ((x+y+frm)&aniZoom)*boost, ((x-y-frm)&aniZoom)*boost, ((x^y)&aniZoom)*boost, 0xFF ) );
-    doneDrawing( 0 );
-    if( (frm%1024) == 0 ){
-        aniZoom = rand();
-        boost   = RAND_AB(1,8);
-        ESP_LOGI(T, "aniZoom = %d,  boost = %d", aniZoom, boost);
-    }
-    frm++;
-}
-
-void drawPlasmaFrame(){
-    static int frm=3001, i, j, k, l;
-    int temp1, temp2;
-    if( frm > 3000 ){
-        frm = 0;
-        i = RAND_AB(1,8);
-        j = RAND_AB(1,8);
-        k = ((i<<5)-1);
-        l = ((j<<5)-1);
-    }
-    startDrawing( 0 );
-    for( int y=0; y<=31; y++ ){
-        for( int x=0; x<=127; x++ ){
-            temp1 = abs((( i*y+(frm*16)/(x+16))%64)-32)*7;
-            temp2 = abs((( j*x+(frm*16)/(y+16))%64)-32)*7;
-            setPixel( 0, x, y, SRGBA( temp1&k, temp2&l, (temp1^temp2)&0x88, 0xFF ) );
-        }
-    }
-    doneDrawing( 0 );
-    frm++;    
-}
-
-void aniBackgroundTask(void *pvParameters){
-    ESP_LOGI(T,"aniBackgroundTask started");
-    uint32_t frameCount = 1;
-    uint8_t aniMode = 0;
-    while(1){
-        switch( aniMode ){
-            case 1:
-                drawTestAnimationFrame();
-                break;
-            case 2:
-                drawPlasmaFrame();
-                break;
-            default:
-                vTaskDelay( 10 / portTICK_PERIOD_MS );
-        }
-        updateFrame();
-        if( (frameCount%10000)==0 ){
-            aniMode = RAND_AB(0,2);
-            if( aniMode == 0 ){
-                int tempColor = scale32( 128, rand() ) | 0xFF000000;
-                setAll( 0, tempColor );
-            }
-        }
-        frameCount++;
-        vTaskDelay( 10 / portTICK_PERIOD_MS );
-    }
-    vTaskDelete( NULL );
-}
 
 void seekToFrame( FILE *f, int byteOffset, int frameOffset ){
     byteOffset += DISPLAY_WIDTH * DISPLAY_HEIGHT * frameOffset / 2;

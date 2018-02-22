@@ -29,18 +29,22 @@ static inline uint32_t scale32(uint32_t scale, uint32_t p) {
     return sag | srb;
 }
 
-#define GR(p) ( p     &0xFF)
-#define GG(p) ((p>> 8)&0xFF)
-#define GB(p) ((p>>16)&0xFF)
-#define GA(p) ((p>>24)&0xFF)
+#define GC(p,ci) (((p)>>((ci)*8))&0xFF)
+#define GR(p)    (GC(p,0))
+#define GG(p)    (GC(p,1))
+#define GB(p)    (GC(p,2))
+#define GA(p)    (GC(p,3))
 #define SRGBA(r,g,b,a) (((a)<<24) | ((b)<<16) | ((g)<<8) | (r))
+
 
 extern uint32_t g_frameBuff[N_LAYERS][DISPLAY_WIDTH*DISPLAY_HEIGHT];
 
 extern uint32_t getBlendedPixel( int x, int y );
 
-// Set a single pixel on a layer to a specific RGBA color in the framebuffer
+// SET / GET a single pixel on a layer to a specific RGBA color in the framebuffer
 void setPixel( uint8_t layer, uint16_t x, uint16_t y, uint32_t color );
+void setPixelColor( uint8_t layer, uint16_t x, uint16_t y, uint8_t cIndex, uint8_t color );
+uint32_t getPixel( uint8_t layer, uint16_t x, uint16_t y );
 
 // Draw over a pixel in frmaebuffer at p, color must be premultiplied alpha
 void setPixelOver( uint8_t layer, uint16_t x, uint16_t y, uint32_t color );

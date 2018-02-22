@@ -12,6 +12,7 @@
 #include "esp_heap_caps.h"
 #include "i2s_parallel.h"
 #include "rgb_led_panel.h"
+#include "app_main.h"
 #include "frame_buffer.h"
 
 // static const char *T = "FRAME_BUFFER";
@@ -70,6 +71,22 @@ uint32_t getBlendedPixel( int x, int y ) {
 void setPixel( uint8_t layer, uint16_t x, uint16_t y, uint32_t color ) {
 	if( x>=DISPLAY_WIDTH || y>=DISPLAY_HEIGHT || layer>=N_LAYERS ){ return;	}
     g_frameBuff[layer][x+y*DISPLAY_WIDTH] = color; //(a<<24) | (b<<16) | (g<<8) | r;
+}
+
+void setPixelColor( uint8_t layer, uint16_t x, uint16_t y, uint8_t cIndex, uint8_t color ) {
+    if( x>=DISPLAY_WIDTH || y>=DISPLAY_HEIGHT || layer>=N_LAYERS ){ return; }
+    uint32_t temp = g_frameBuff[layer][x+y*DISPLAY_WIDTH];
+    temp &= 0xFFFFFF00 << (cIndex*8);
+    temp |= color << (cIndex*8);
+    g_frameBuff[layer][x+y*DISPLAY_WIDTH] = temp;
+}
+
+// Set a pixel in frmaebuffer at p
+uint32_t getPixel( uint8_t layer, uint16_t x, uint16_t y ) {
+    if( layer>=N_LAYERS ){ return 0; }
+    x = MIN(x,DISPLAY_WIDTH-1);
+    y = MIN(y,DISPLAY_HEIGHT-1);
+    return g_frameBuff[layer][x+y*DISPLAY_WIDTH]; //(a<<24) | (b<<16) | (g<<8) | r;
 }
 
 void setPixelOver( uint8_t layer, uint16_t x, uint16_t y, uint32_t color ) {
