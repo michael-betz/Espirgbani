@@ -57,25 +57,41 @@ void playAni( FILE *f, headerEntry_t *h ){
     }
 }
 
-void manageBrightness( char* tStr ){
+void manageBrightness( struct tm *timeinfo ){
+    static int nBadPings = 0;
     cJSON *jPow = jGet( getSettings(), "power");
     cJSON *jHi  = jGet( jPow, "hi");
     cJSON *jLo  = jGet( jPow, "lo");
-    switch( brightNessState ){
-        case BR_NIGHT:
-            if ( strcmp( jGetS(jHi,"t"), tStr) == 0 ) {
-                brightNessState = BR_DAY;
-                g_rgbLedBrightness = jGetI(jHi,"p");
-                ESP_LOGI(T, "jHi: %s p = %d", jGetS(jHi,"t"), jGetI(jHi,"p") );
+    const char *pingIpStr;
+    uint32_t pingRespTime;
+    ip4_addr_t ip;
+    int iHi  = jGetI(jHi,"m") + jGetI(jHi,"h")*60;
+    int iLo  = jGetI(jLo,"m") + jGetI(jLo,"h")*60;
+    int iCur = timeinfo->tm_min + timeinfo->tm_hour*60;
+    if ( iCur >= iHi && iCur < iLo ) {
+        // Daylite mode
+        brightNessState = BR_DAY;
+        if(( pingIpStr = jGetSD(jHi,"pingIp",NULL) )){
+            ip4addr_aton( pingIpStr, &ip);
+            if(( pingRespTime = isPingOk( &ip, 3 ) )){
+                nBadPings = 0;
+                ESP_LOGI(T,"Ping response from %s in %d ms", ip4addr_ntoa(&ip), pingRespTime );
+            } else {
+                nBadPings++;
+                ESP_LOGW(T,"Ping timeout %d on %s", nBadPings, ip4addr_ntoa(&ip) );
             }
-            break;
-        case BR_DAY:
-            if(  strcmp( jGetS(jLo,"t"), tStr) == 0 ){
-                brightNessState = BR_NIGHT;
+            if( nBadPings >= 5 ){
                 g_rgbLedBrightness = jGetI(jLo,"p");
-                ESP_LOGI(T, "jLo: %s p = %d", jGetS(jLo,"t"), jGetI(jLo,"p") );
+            } else {
+                g_rgbLedBrightness = jGetI(jHi,"p");
             }
-            break;
+        } else {
+            g_rgbLedBrightness = jGetI(jHi,"p");
+        }
+    } else {
+        // Night mode
+        brightNessState = BR_NIGHT;
+        g_rgbLedBrightness = jGetI(jLo,"p");
     }
 }
 
@@ -105,7 +121,7 @@ void aniClockTask(void *pvParameters){
         localtime_r(&now, &timeinfo);
         strftime(strftime_buf, sizeof(strftime_buf), "%H:%M", &timeinfo);
         drawStrCentered( strftime_buf, 1, rand(), 0xFF000000 );
-        manageBrightness( strftime_buf );
+        manageBrightness( &timeinfo );
         // updateFrame();
         vTaskDelay( 1000*60 / portTICK_PERIOD_MS );
     }
@@ -127,7 +143,7 @@ void app_main(){
     setAll( 1, 0xFF002200 );
     setAll( 2, 0xFF000022 );
     updateFrame();
-    g_rgbLedBrightness = 70;
+    g_rgbLedBrightness = 10;
 
     //------------------------------
     // Init filesystems

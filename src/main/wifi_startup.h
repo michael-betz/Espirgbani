@@ -6,11 +6,13 @@
 #include "libesphttpd/esp.h"
 #include "libesphttpd/httpd.h"
 #include "cJSON.h"
+#include "lwip/inet.h"
 
 
 #define SETTINGS_FILE	"/SD/settings.json"
 #define N_WIFI_TRYS		6
 #define WIFI_DELAY		10000	//[ms]
+#define DNS_TIMEOUT 	10000 	//[ms]
 
 #define GET_HOSTNAME() jGetSD(getSettings(),"hostname","espirgbani")
 
@@ -45,5 +47,11 @@ cJSON *getSettings();
 void reloadSettings();
 // The webserver callbakc
 CgiStatus cgiReloadSettings(HttpdConnData *connData);
+
+// Resolve a hostname
+ip4_addr_t dnsResolve( const char *dnsRequestBuffer );
+
+// Ping a host. Blocks. Returns 1 on success.
+uint8_t isPingOk( ip4_addr_t *ip, uint32_t timeoutS );
 
 #endif

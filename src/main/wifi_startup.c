@@ -14,6 +14,8 @@
 #include "esp_sleep.h"
 #include "esp_spiffs.h"
 #include "esp_wifi.h"
+#include "esp_ping.h"
+#include "ping.h"
 #include "nvs_flash.h"
 
 #include "libesphttpd/esp.h"
@@ -26,10 +28,13 @@
 #include "libesphttpd/captdns.h"
 
 #include "apps/sntp/sntp.h"
-#include <lwip/err.h>
-#include <lwip/netdb.h>
-#include <lwip/sockets.h>
-#include <lwip/sys.h>
+#include "lwip/err.h"
+#include "lwip/netdb.h"
+#include "lwip/sockets.h"
+#include "lwip/sys.h"
+#include "lwip/inet.h"
+#include "lwip/ip4_addr.h"
+#include "lwip/dns.h"
 
 #include "cgi.h"
 #include "cJSON.h"
@@ -204,7 +209,7 @@ cJSON *getSettings(){
 const char *jGetSD( const cJSON *j, const char *sName, const char *sDefault ){
     const cJSON *jTemp = cJSON_GetObjectItemCaseSensitive( j, sName );
     if( !cJSON_IsString(jTemp) ){
-        ESP_LOGE(T, "json error: %s is not a string, falling back to %s", sName, sDefault);
+        ESP_LOGE(T, "json error: %s is not a string", sName);
         return sDefault;
     }
     return jTemp->valuestring;
@@ -430,4 +435,70 @@ void wifi_disable(){
     esp_wifi_stop();
     // All done, unmount partition and disable SPIFFS
     esp_vfs_spiffs_unregister(NULL);
+}
+
+xSemaphoreHandle dnsCallbackSema = NULL;
+ip_addr_t g_dnsResponse;
+
+void dnsCallback(const char *name, const ip_addr_t *ipaddr, void *callback_arg){
+    memcpy( &g_dnsResponse, ipaddr, sizeof(ip_addr_t) );
+    xSemaphoreGive( dnsCallbackSema );
+}
+
+// dnsRequestBuffer = zero terminated string of domain to be dns'ed, returns 32 bit IP if good, 0 otherwise
+ip4_addr_t dnsResolve( const char *dnsRequestBuffer ){
+    if (dnsCallbackSema == NULL){
+        vSemaphoreCreateBinary( dnsCallbackSema );
+    }
+    xSemaphoreTake( dnsCallbackSema, 0 );       // Make sure smea is not available already (must be given by dnsCallback)
+    dns_init();
+    ip_addr_t responseIp;
+    dns_gethostbyname( dnsRequestBuffer, &responseIp, dnsCallback, NULL);
+    if( xSemaphoreTake( dnsCallbackSema, DNS_TIMEOUT/portTICK_PERIOD_MS ) ){
+        ESP_LOGD( T, "DNS for %s done. Response = %s", dnsRequestBuffer, ip4addr_ntoa(&g_dnsResponse.u_addr.ip4) );
+    } else {
+        ESP_LOGW( T, "DNS for %s timeout", dnsRequestBuffer);
+        ip4_addr_set_any( &g_dnsResponse.u_addr.ip4 );
+    }
+    return g_dnsResponse.u_addr.ip4;
+}
+
+xSemaphoreHandle pingCallbackSema = NULL;
+uint32_t g_pingRespTime;
+
+esp_err_t pingResults(ping_target_id_t msgType, esp_ping_found * pf){
+    switch(pf->ping_err){
+        case PING_RES_FINISH:
+            return ESP_OK;
+        case PING_RES_TIMEOUT:
+            g_pingRespTime = 0;
+            xSemaphoreGive( pingCallbackSema );
+            break;
+        case PING_RES_OK:
+            g_pingRespTime = pf->resp_time;
+            xSemaphoreGive( pingCallbackSema );
+            break;
+    }
+    // ESP_LOGD(T,"RespTime:%d Sent:%d Rec:%d ErrCnt:%d Stat:%d, TimeoutCnt:%d", pf->resp_time, pf->send_count, pf->recv_count, pf->err_count, pf->ping_err, pf->timeout_count);
+    return ESP_OK;
+}
+
+uint8_t isPingOk( ip4_addr_t *ip, uint32_t timeoutS ){
+    if( !ip ) return 0;
+    if (pingCallbackSema == NULL){
+        vSemaphoreCreateBinary( pingCallbackSema );
+    }
+    xSemaphoreTake( pingCallbackSema, 0 ); // Make sure smea is not available already (must be given by pingResults)
+    esp_ping_set_target(PING_TARGET_IP_ADDRESS,       ip,    sizeof(uint32_t));
+    uint32_t x = 1;     // 1 ping per report
+    esp_ping_set_target(PING_TARGET_IP_ADDRESS_COUNT, &x,     sizeof(uint32_t));
+    x = 0;              // 0 delay between pings
+    esp_ping_set_target(PING_TARGET_DELAY_TIME,       &x,    sizeof(uint32_t));
+    esp_ping_set_target(PING_TARGET_RCV_TIMEO,        &timeoutS,    sizeof(uint32_t));
+    esp_ping_set_target(PING_TARGET_RES_FN,           &pingResults, sizeof(pingResults));
+    ping_init();
+    if( xSemaphoreTake( pingCallbackSema, (timeoutS*2000)/portTICK_PERIOD_MS ) ){
+        return g_pingRespTime;
+    }
+    return 0;
 }
