@@ -7,14 +7,15 @@ Work in progress. [Some writeup here](http://yetifrisstlama.blogspot.com/2018/02
 # PCB
 Fits inside one of the 64x32 panels.
 
-![back](https://github.com/yetifrisstlama/Espirgbani/raw/master/pcb/2.png)
+![back](https://github.com/yetifrisstlama/Espirgbani/raw/master/pcb/1.png)
 
 ![wiring](https://github.com/yetifrisstlama/Espirgbani/raw/master/pcb/back.jpg)
 
-### TODO
+### Revisions
+Changes included in Rev 1
   * Change programming port from custom pogo-pins to a normal header
   * Add an ambient light level sensor
-  * Re-arrange the mounting holes
+  * [ Re-arrange the mounting hole ] TODO
   
 # SD card instructions
 Format as FAT32, then copy the following files: 
