@@ -27,13 +27,13 @@ Format as FAT32, then copy the following files:
 ```json
 {
     "power": {
-        "hi": {         # Switches to brightness `40` at 7:30
-            "h": 7,     # but only if `192.168.1.208` responds to pings
+        "hi": {
+            "h": 7,
             "m": 30,
             "p": 40,
             "pingIp": "192.168.1.208"
         },
-        "lo": {         # Switches to brightness `1` at 23:00
+        "lo": {
             "h": 23,
             "m": 0,
             "p": 1
@@ -47,6 +47,11 @@ Format as FAT32, then copy the following files:
     }
 }
 ```
+__Some notes about the `power` section__
+  * Switches to brightness `40` at `7:30`
+  * But only if `192.168.1.208` responds to pings
+  * Switches to brightness `1` at `23:00`
+  
 Note that, once running, the settings.json file can be edited through the web interface.
 
 ## how to get `runDmd.img`
