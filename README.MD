@@ -18,20 +18,36 @@ Fits inside one of the 64x32 panels.
   
 # SD card instructions
 Format as FAT32, then copy the following files: 
-  * `./knownWifis.json`
+  * `./settings.json`
   * `./runDmd.img`
   * `./fnt/{d}.fnt`
   * `./fnt/{d}_0.bmp`
   
-## example `knownWifis.json`
+## example `settings.json`
 ```json
 {
-  "<ssid>": {
-    "pw":   "<password>",
-    "type": "full"
-  }
+    "power": {
+        "hi": {         # Switches to brightness `40` at 7:30
+            "h": 7,     # but only if `192.168.1.208` responds to pings
+            "m": 30,
+            "p": 40,
+            "pingIp": "192.168.1.208"
+        },
+        "lo": {         # Switches to brightness `1` at 23:00
+            "h": 23,
+            "m": 0,
+            "p": 1
+        }
+    },
+    "hostname": "espirgbani",
+    "wifis": {
+        "<wifi-ssid>": {
+            "pw": "<wifi-password>"
+        }
+    }
 }
 ```
+Note that, once running, the settings.json file can be edited through the web interface.
 
 ## how to get `runDmd.img`
   * Find a run-dmd image file and write it to SD card according to their instructions (HDD Raw Copy Tool and Windows required)
