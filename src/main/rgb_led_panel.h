@@ -17,12 +17,12 @@
 #define GPIO_A       5
 #define GPIO_B      18
 #define GPIO_C      19
-#define GPIO_D      23 //21
+#define GPIO_D      23
 #define GPIO_OE     25
 #define GPIO_LAT    26
 #define GPIO_R0      2
 #define GPIO_G0     15
-#define GPIO_B0     13 //4
+#define GPIO_B0     13
 #define GPIO_R1     16
 #define GPIO_G1     27
 #define GPIO_B1     17
