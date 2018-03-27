@@ -52,6 +52,6 @@ CgiStatus cgiReloadSettings(HttpdConnData *connData);
 ip4_addr_t dnsResolve( const char *dnsRequestBuffer );
 
 // Ping a host. Blocks. Returns 1 on success.
-uint8_t isPingOk( ip4_addr_t *ip, uint32_t timeoutS );
+uint32_t isPingOk( ip4_addr_t *ip, uint32_t timeout_ms );
 
 #endif

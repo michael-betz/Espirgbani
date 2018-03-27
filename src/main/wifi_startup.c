@@ -479,11 +479,11 @@ esp_err_t pingResults(ping_target_id_t msgType, esp_ping_found * pf){
             xSemaphoreGive( pingCallbackSema );
             break;
     }
-    // ESP_LOGD(T,"RespTime:%d Sent:%d Rec:%d ErrCnt:%d Stat:%d, TimeoutCnt:%d", pf->resp_time, pf->send_count, pf->recv_count, pf->err_count, pf->ping_err, pf->timeout_count);
+    ESP_LOGD(T,"RespTime:%d Sent:%d Rec:%d ErrCnt:%d Stat:%d, TimeoutCnt:%d", pf->resp_time, pf->send_count, pf->recv_count, pf->err_count, pf->ping_err, pf->timeout_count);
     return ESP_OK;
 }
 
-uint8_t isPingOk( ip4_addr_t *ip, uint32_t timeoutS ){
+uint32_t isPingOk( ip4_addr_t *ip, uint32_t timeout_ms ){
     if( !ip ) return 0;
     if (pingCallbackSema == NULL){
         vSemaphoreCreateBinary( pingCallbackSema );
@@ -494,10 +494,10 @@ uint8_t isPingOk( ip4_addr_t *ip, uint32_t timeoutS ){
     esp_ping_set_target(PING_TARGET_IP_ADDRESS_COUNT, &x,     sizeof(uint32_t));
     x = 0;              // 0 delay between pings
     esp_ping_set_target(PING_TARGET_DELAY_TIME,       &x,    sizeof(uint32_t));
-    esp_ping_set_target(PING_TARGET_RCV_TIMEO,        &timeoutS,    sizeof(uint32_t));
+    esp_ping_set_target(PING_TARGET_RCV_TIMEO,        &timeout_ms,    sizeof(uint32_t));
     esp_ping_set_target(PING_TARGET_RES_FN,           &pingResults, sizeof(pingResults));
     ping_init();
-    if( xSemaphoreTake( pingCallbackSema, (timeoutS*2000)/portTICK_PERIOD_MS ) ){
+    if( xSemaphoreTake( pingCallbackSema, (timeout_ms*2)/portTICK_PERIOD_MS ) ){
         return g_pingRespTime;
     }
     return 0;

@@ -104,8 +104,8 @@ void aniBackgroundTask(void *pvParameters){
         }
         updateFrame();
         if( (frameCount%10000)==0 ){
-            aniMode = RAND_AB(0,2);
-            if( aniMode == 0 ){
+            aniMode = RAND_AB(0,5);
+            if( aniMode==0 || aniMode>3 ){
                 int tempColor = 0xFF000000;// | scale32( 128, rand() );
                 setAll( 0, tempColor );
             }
