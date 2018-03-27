@@ -27,6 +27,7 @@
 #include "bmp.h"
 #include "font.h"
 #include "shaders.h"
+#include "fast_hsv2rgb.h"
 #include "app_main.h"
 
 static const char *T = "MAIN_APP";
@@ -40,7 +41,8 @@ void seekToFrame( FILE *f, int byteOffset, int frameOffset ){
 }
 
 void playAni( FILE *f, headerEntry_t *h ){
-    uint32_t aniCol = rand();
+    uint8_t r,g,b;
+    fast_hsv2rgb_32bit( RAND_AB(0,HSV_HUE_MAX), HSV_SAT_MAX, HSV_VAL_MAX, &r, &g, &b);
     for( int i=0; i<h->nFrameEntries; i++ ){
         frameHeaderEntry_t fh = h->frameHeader[i];
         if( fh.frameId == 0 ){
@@ -49,7 +51,7 @@ void playAni( FILE *f, headerEntry_t *h ){
         } else {
             seekToFrame( f, h->byteOffset+HEADER_SIZE, fh.frameId-1 );
             startDrawing( 2 );
-            setFromFile( f, 2, aniCol );
+            setFromFile( f, 2, SRGBA(r,g,b,0xFF) );
         }
         doneDrawing( 2 );
         // updateFrame();

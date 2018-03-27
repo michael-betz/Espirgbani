@@ -129,7 +129,7 @@ uint32_t fadeOut( uint8_t layer, uint8_t factor ){
 }
 
 // take a shade (0-15) from animation file and 24 bit RGB color. Return a RGBA color.
-#define GET_ANI_COLOR( p, c ) ( ((p)==0x0A)?(0):(scale32(p<<4,c)|0xFF000000) )
+#define GET_ANI_COLOR( p, c ) ( ((p)==0x0A)?(0):(scale32(p*17,c)|0xFF000000) )
 
 void setFromFile( FILE *f, uint8_t layer, uint32_t color ){
     uint32_t *p = g_frameBuff[layer];
