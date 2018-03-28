@@ -1,6 +1,4 @@
 (sym_lib_table
   (lib (name rgb-cache)(type Legacy)(uri ${KIPRJMOD}/rgb-cache.lib)(options "")(descr ""))
   (lib (name rgb-rescue)(type Legacy)(uri ${KIPRJMOD}/rgb-rescue.lib)(options "")(descr ""))
-  (lib (name -15v)(type Legacy)(uri "/home/michael/Google Drive/kicad_wsp/lib/-15v.lib")(options "")(descr ""))
-  (lib (name myStuff)(type Legacy)(uri "/home/michael/Google Drive/kicad_wsp/lib/myStuff.lib")(options "")(descr ""))
 )

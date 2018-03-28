@@ -15,7 +15,7 @@ Comment3 ""
 Comment4 "Pinball RGB clock"
 $EndDescr
 $Comp
-L rgb-rescue:+3V3-RESCUE-rgb #PWR01
+L power:+3.3V #PWR01
 U 1 1 5A1F09A4
 P 5400 2450
 F 0 "#PWR01" H 5400 2300 50  0001 C CNN
@@ -26,7 +26,7 @@ F 3 "" H 5400 2450 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L rgb-rescue:C-RESCUE-rgb C1
+L Device:C C1
 U 1 1 5A1F09A5
 P 5600 2500
 F 0 "C1" V 5400 2550 50  0000 R CNN
@@ -37,7 +37,7 @@ F 3 "" H 5600 2500 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L rgb-rescue:GND-RESCUE-rgb #PWR02
+L power:GND #PWR02
 U 1 1 5A1F09A6
 P 5800 2500
 F 0 "#PWR02" H 5800 2250 50  0001 C CNN
@@ -48,7 +48,7 @@ F 3 "" H 5800 2500 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L rgb-rescue:GND-RESCUE-rgb #PWR03
+L power:GND #PWR03
 U 1 1 5A1F09A7
 P 7850 2450
 F 0 "#PWR03" H 7850 2200 50  0001 C CNN
@@ -59,7 +59,7 @@ F 3 "" H 7850 2450 50  0001 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L rgb-rescue:ESP-WROOM-32-RESCUE-rgb U1
+L myStuff:ESP-WROOM-32 U1
 U 1 1 5A1F09A8
 P 6750 3150
 F 0 "U1" H 6400 3850 60  0000 C CNN
@@ -70,7 +70,7 @@ F 3 "https://www.espressif.com/sites/default/files/documentation/esp_wroom_32_da
 	1    0    0    -1  
 $EndComp
 $Comp
-L rgb-rescue:R-RESCUE-rgb R1
+L Device:R R1
 U 1 1 5A1F09AB
 P 5200 2500
 F 0 "R1" V 4993 2500 50  0000 C CNN
@@ -83,7 +83,7 @@ $EndComp
 Text Label 5350 2700 0    60   ~ 0
 rstBtn
 $Comp
-L rgb-rescue:GND-RESCUE-rgb #PWR04
+L power:GND #PWR04
 U 1 1 5A1F09AC
 P 6400 4200
 F 0 "#PWR04" H 6400 3950 50  0001 C CNN
@@ -94,7 +94,7 @@ F 3 "" H 6400 4200 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L rgb-rescue:GND-RESCUE-rgb #PWR05
+L power:GND #PWR05
 U 1 1 5A1F09AD
 P 9400 3150
 F 0 "#PWR05" H 9400 2900 50  0001 C CNN
@@ -113,7 +113,7 @@ NoConn ~ 7100 4150
 Text Label 7950 3800 0    60   ~ 0
 progFlag
 $Comp
-L rgb-rescue:LM317EMP-RESCUE-rgb U2
+L myStuff:LM317EMP U2
 U 1 1 5A1F2D82
 P 3100 6450
 F 0 "U2" H 3100 6858 50  0000 C CNN
@@ -124,7 +124,7 @@ F 3 "" H 3100 6450 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L rgb-rescue:+3V3-RESCUE-rgb #PWR06
+L power:+3.3V #PWR06
 U 1 1 5A1F32B5
 P 4500 6350
 F 0 "#PWR06" H 4500 6200 50  0001 C CNN
@@ -135,7 +135,7 @@ F 3 "" H 4500 6350 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L rgb-rescue:GND-RESCUE-rgb #PWR07
+L power:GND #PWR07
 U 1 1 5A1F370A
 P 3950 7200
 F 0 "#PWR07" H 3950 6950 50  0001 C CNN
@@ -146,7 +146,7 @@ F 3 "" H 3950 7200 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L rgb-rescue:GND-RESCUE-rgb #PWR08
+L power:GND #PWR08
 U 1 1 5A1F3E37
 P 2550 7200
 F 0 "#PWR08" H 2550 6950 50  0001 C CNN
@@ -157,7 +157,7 @@ F 3 "" H 2550 7200 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L rgb-rescue:Conn_01x02-RESCUE-rgb J3
+L Connector_Generic:Conn_01x02 J3
 U 1 1 5A1F3E67
 P 1950 6750
 F 0 "J3" H 2030 6742 50  0000 L CNN
@@ -168,7 +168,7 @@ F 3 "" H 1950 6750 50  0001 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L rgb-rescue:GND-RESCUE-rgb #PWR09
+L power:GND #PWR09
 U 1 1 5A1F3FA2
 P 2200 7200
 F 0 "#PWR09" H 2200 6950 50  0001 C CNN
@@ -231,7 +231,7 @@ Connection ~ 3950 6800
 Wire Wire Line
 	2200 6400 2550 6400
 $Comp
-L rgb-rescue:C-RESCUE-rgb C3
+L Device:C C3
 U 1 1 5A1F4174
 P 2550 6850
 F 0 "C3" V 2350 6900 50  0000 R CNN
@@ -249,7 +249,7 @@ Connection ~ 2550 6400
 Text Notes 850  6750 0    60   ~ 0
 5 V input
 $Comp
-L rgb-rescue:GND-RESCUE-rgb #PWR010
+L power:GND #PWR010
 U 1 1 5A1F44EA
 P 4500 7200
 F 0 "#PWR010" H 4500 6950 50  0001 C CNN
@@ -260,7 +260,7 @@ F 3 "" H 4500 7200 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L rgb-rescue:C-RESCUE-rgb C2
+L Device:C C2
 U 1 1 5A1F44F0
 P 4500 6800
 F 0 "C2" V 4300 6850 50  0000 R CNN
@@ -287,7 +287,7 @@ Wire Wire Line
 Wire Wire Line
 	2200 6350 2200 6400
 $Comp
-L rgb-rescue:+5V-RESCUE-rgb #PWR011
+L power:+5V #PWR011
 U 1 1 5A1F57FC
 P 9400 3000
 F 0 "#PWR011" H 9400 2850 50  0001 C CNN
@@ -299,7 +299,7 @@ F 3 "" H 9400 3000 50  0001 C CNN
 $EndComp
 Connection ~ 2200 6400
 $Comp
-L rgb-rescue:Conn_02x08_Odd_Even-RESCUE-rgb J1
+L Connector_Generic:Conn_02x08_Odd_Even J1
 U 1 1 5A1F6343
 P 2050 2600
 F 0 "J1" H 2050 3050 50  0000 C CNN
@@ -424,7 +424,7 @@ Wire Wire Line
 	2150 7100 2200 7100
 Connection ~ 2200 7100
 $Comp
-L rgb-rescue:RASPI_SD-RESCUE-rgb U3
+L myStuff:RASPI_SD U3
 U 1 1 5A2024AA
 P 2850 5350
 F 0 "U3" H 3425 7037 60  0000 C CNN
@@ -497,7 +497,7 @@ SD_MOSI
 Text Label 5400 3300 0    60   ~ 0
 SD_CLK
 $Comp
-L rgb-rescue:R-RESCUE-rgb R4
+L Device:R R4
 U 1 1 5A206FDA
 P 5200 3200
 F 0 "R4" V 5300 3050 50  0000 C CNN
@@ -508,7 +508,7 @@ F 3 "" H 5200 3200 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L rgb-rescue:+3V3-RESCUE-rgb #PWR019
+L power:+3.3V #PWR019
 U 1 1 5A207217
 P 5000 3200
 F 0 "#PWR019" H 5000 3050 50  0001 C CNN
@@ -713,7 +713,7 @@ Wire Wire Line
 Wire Wire Line
 	9350 3800 9350 3700
 $Comp
-L rgb-rescue:GND-RESCUE-rgb #PWR024
+L power:GND #PWR024
 U 1 1 5A942877
 P 9850 3750
 F 0 "#PWR024" H 9850 3500 50  0001 C CNN
@@ -750,7 +750,7 @@ $EndComp
 Wire Wire Line
 	9350 2050 9400 2050
 $Comp
-L rgb-rescue:GND-RESCUE-rgb #PWR023
+L power:GND #PWR023
 U 1 1 5A95FB89
 P 9850 2100
 F 0 "#PWR023" H 9850 1850 50  0001 C CNN
@@ -814,7 +814,7 @@ F 3 "~" H 4100 3000 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L rgb-rescue:+3V3-RESCUE-rgb #PWR020
+L power:+3.3V #PWR020
 U 1 1 5A9EBD96
 P 4100 2400
 F 0 "#PWR020" H 4100 2250 50  0001 C CNN
@@ -874,7 +874,7 @@ Wire Wire Line
 Wire Wire Line
 	2200 6400 2200 6750
 $Comp
-L rgb-rescue:Conn_01x02-RESCUE-rgb J2
+L Connector_Generic:Conn_01x02 J2
 U 1 1 5AA1C52F
 P 3900 2550
 F 0 "J2" H 3980 2542 50  0000 L CNN
@@ -890,4 +890,58 @@ Wire Wire Line
 	4100 2650 4100 2800
 Text Notes 3950 2450 2    60   ~ 0
 Photo\nresistor
+$Comp
+L microsd_spi_cd:MicroSD_SPI_CD U6
+U 1 1 5ABB763C
+P 4350 4250
+F 0 "U6" H 4073 4303 60  0000 R CNN
+F 1 "MicroSD_SPI_CD" H 4073 4197 60  0000 R CNN
+F 2 "newStuff:GCT-MEM2055-00-190-01-A" H 4073 4144 60  0001 R CNN
+F 3 "" H 4200 4250 60  0000 C CNN
+	1    4350 4250
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	3550 4450 4000 4450
+Text Label 3550 4450 0    60   ~ 0
+SD_MISO
+Wire Wire Line
+	3550 3950 4000 3950
+Text Label 3600 3950 0    60   ~ 0
+SD_CS
+Wire Wire Line
+	3550 4050 4000 4050
+Text Label 3600 4050 0    60   ~ 0
+SD_MOSI
+Wire Wire Line
+	3550 4250 4000 4250
+Text Label 3600 4250 0    60   ~ 0
+SD_CLK
+$Comp
+L power:GND #PWR026
+U 1 1 5ABEF3D1
+P 3950 4350
+F 0 "#PWR026" H 3950 4100 50  0001 C CNN
+F 1 "GND" V 3950 4150 50  0000 C CNN
+F 2 "" H 3950 4350 50  0001 C CNN
+F 3 "" H 3950 4350 50  0001 C CNN
+	1    3950 4350
+	0    1    1    0   
+$EndComp
+$Comp
+L power:+3V3 #PWR025
+U 1 1 5ABEF562
+P 3950 4150
+F 0 "#PWR025" H 3950 4000 50  0001 C CNN
+F 1 "+3V3" V 3950 4400 50  0000 C CNN
+F 2 "" H 3950 4150 50  0001 C CNN
+F 3 "" H 3950 4150 50  0001 C CNN
+	1    3950 4150
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	3950 4150 4000 4150
+Wire Wire Line
+	3950 4350 4000 4350
+NoConn ~ 4000 4550
 $EndSCHEMATC
