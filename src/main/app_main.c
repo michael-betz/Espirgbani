@@ -33,7 +33,7 @@
 static const char *T = "MAIN_APP";
 
 int g_maxFnt = 0;
-int g_fontNumberRequest = -1;
+int g_fontNumberRequest = 0;
 
 void seekToFrame( FILE *f, int byteOffset, int frameOffset ){
     byteOffset += DISPLAY_WIDTH * DISPLAY_HEIGHT * frameOffset / 2;
@@ -119,7 +119,7 @@ void aniClockTask(void *pvParameters){
             initFont( strftime_buf );
             g_fontNumberRequest = -1;
         }
-        time(&now);       
+        time(&now);
         localtime_r(&now, &timeinfo);
         strftime(strftime_buf, sizeof(strftime_buf), "%H:%M", &timeinfo);
         drawStrCentered( strftime_buf, 1, rand(), 0xFF000000 );
@@ -134,7 +134,7 @@ void app_main(){
     //------------------------------
     // Enable RAM log file
     //------------------------------
-    // esp_log_level_set( "*", ESP_LOG_WARN );
+    // esp_log_level_set( "*", ESP_LOG_INFO );
     esp_log_set_vprintf( wsDebugPrintf );
 
     //------------------------------
@@ -174,17 +174,15 @@ void app_main(){
     time_t now = 0;
     struct tm timeinfo = { 0 };
     char strftime_buf[64];
-    time(&now);       
+    time(&now);
     localtime_r(&now, &timeinfo);
     strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
     ESP_LOGI(T, "Local Time: %s (%ld)", strftime_buf, time(NULL));
     srand(time(NULL));
 
-    initFont( "/SD/fnt/0" );
-
-    // //------------------------------
-    // // Startup animated background layer
-    // //------------------------------
+    //------------------------------
+    // Startup animated background layer
+    //------------------------------
     xTaskCreate(&aniBackgroundTask, "aniBackground", 4096, NULL, 0, NULL);
 
     //------------------------------

@@ -95,7 +95,7 @@ CgiUploadFlashDef uploadParams = {
     .fw1Pos=0x010000,
     .fw2Pos=0x0D0000,
     .fwSize=0x0C0000,
-    .tagName="main1"
+    .tagName=(char*)"main1"
 };
 // Webserver config
 const HttpdBuiltInUrl builtInUrls[]={
@@ -117,7 +117,7 @@ const HttpdBuiltInUrl builtInUrls[]={
 };
 
 static esp_err_t wifi_event_handler(void *ctx, system_event_t *event)
-{  
+{
     switch(event->event_id) {
         case SYSTEM_EVENT_STA_START:
             tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_STA, GET_HOSTNAME());
@@ -132,7 +132,7 @@ static esp_err_t wifi_event_handler(void *ctx, system_event_t *event)
             if (!sntp_enabled()){
                 ESP_LOGI(T, "Initializing SNTP");
                 sntp_setoperatingmode(SNTP_OPMODE_POLL);
-                sntp_setservername(0, "pool.ntp.org");
+                sntp_setservername(0, (char *)"pool.ntp.org");
                 sntp_init();
             }
             break;
@@ -148,7 +148,7 @@ static esp_err_t wifi_event_handler(void *ctx, system_event_t *event)
     return ESP_OK;
 }
 
-char *readFileDyn( char* fName, int *fSize ){
+char *readFileDyn( const char* fName, int *fSize ){
     // opens the file fName and returns it as dynamically allocated char*
     // if fSize is not NULL, copies the number of bytes read there
     // dont forget to fall free() on the char* result
@@ -174,7 +174,7 @@ char *readFileDyn( char* fName, int *fSize ){
     return string;
 }
 
-cJSON *readJsonDyn( char* fName ){
+cJSON *readJsonDyn( const char* fName ){
     // opens the json file `fName` and returns it as cJSON*
     // don't forget to call cJSON_Delete() on it
     cJSON *root;
@@ -338,7 +338,7 @@ void startHotspotMode(){
 }
 
 void wifiConnectionTask(void *pvParameters){
-    int wifiTry=0;   
+    int wifiTry=0;
     wifi_sta_list_t hsStas;
 
     //------------------------------
@@ -358,7 +358,7 @@ void wifiConnectionTask(void *pvParameters){
                 if( ++wifiTry >= N_WIFI_TRYS ){
                     ESP_LOGW(T,"No known Wifis found, switching to hotspot mode");
                     wifiState = WIFI_START_HOTSPOT_MODE;
-                }    
+                }
                 break;
 
             case WIFI_CONNECTED:
@@ -381,34 +381,24 @@ void wifiConnectionTask(void *pvParameters){
                 wifiState = WIFI_HOTSPOT_RUNNING;
                 wifiTry = 0;
                 break;
-            
+
             case WIFI_HOTSPOT_RUNNING:
                 //---------------------------------------------------
                 // Run hotspot. Timeout when noone is connected
                 //---------------------------------------------------
                 if( esp_wifi_ap_get_sta_list( &hsStas ) == ESP_OK ){
                     if ( hsStas.num == 0 ){
-                        if( ++wifiTry > N_WIFI_TRYS ){
-                            wifiState = WIFI_OFF_MODE;
+                        if( ++wifiTry > N_WIFI_TRYS*3 ){
+                            wifiTry = 0;
+                            wifiState = WIFI_CON_TO_AP_MODE;
                             continue;
                         }
-                        ESP_LOGW(T, "Hotspot timeout: %d", wifiTry);
+                        ESP_LOGD(T, "Hotspot timeout: %d", wifiTry);
                     } else {
                         wifiTry = 0;
                     }
                 }
                 vTaskDelay( WIFI_DELAY/portTICK_PERIOD_MS );
-                break;
-                
-            case WIFI_OFF_MODE:
-                //---------------------------------------------------
-                // Disconnect wifi
-                //---------------------------------------------------
-                wifi_disable();
-                ESP_ERROR_CHECK( esp_wifi_stop() );
-                ESP_LOGI(T, "WIFI_OFF_MODE");
-                wifiState = WIFI_IDLE;
-                wifiTry = 0;
                 break;
 
             case WIFI_IDLE:

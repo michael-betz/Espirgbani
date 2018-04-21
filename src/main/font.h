@@ -65,7 +65,7 @@ font_t *loadFntFile( char *fileName );
 void printFntFile( font_t *fDat );
 fontChar_t *getCharInfo( font_t *fDat, char c );
 void freeFntFile( font_t *fDat );
-void initFont( char *filePrefix );
+void initFont( const char *filePrefix );
 void drawChar( char c, uint8_t layer, uint32_t color, uint8_t chOffset );
 void setCur( uint16_t x, uint16_t y );
 
@@ -79,6 +79,6 @@ void getStrDim( const char *str, int16_t *width, int16_t *height );
 void drawStrCentered( const char *str, uint8_t layer, uint32_t cOutline, uint32_t cFill );
 
 // Returns the number of consecutive `path/0.fnt` files
-int cntFntFiles( char* path );
+int cntFntFiles( const char* path );
 
 #endif

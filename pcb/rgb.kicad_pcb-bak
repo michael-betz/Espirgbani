@@ -64,10 +64,10 @@
     (aux_axis_origin 0 0)
     (visible_elements 7FFFFFFF)
     (pcbplotparams
-      (layerselection 0x00030_ffffffff)
+      (layerselection 0x010f0_ffffffff)
       (usegerberextensions false)
-      (usegerberattributes true)
-      (usegerberadvancedattributes true)
+      (usegerberattributes false)
+      (usegerberadvancedattributes false)
       (creategerberjobfile true)
       (excludeedgelayer true)
       (linewidth 2.000000)
@@ -87,9 +87,9 @@
       (subtractmaskfromsilk false)
       (outputformat 1)
       (mirror false)
-      (drillshape 1)
+      (drillshape 0)
       (scaleselection 1)
-      (outputdirectory ""))
+      (outputdirectory ./grb))
   )
 
   (net 0 "")
@@ -245,7 +245,7 @@
       (net 41 "Net-(U6-Pad9)"))
     (pad "" np_thru_hole circle (at 4.95 11.3 180) (size 1 1) (drill 1) (layers *.Cu *.Mask B.SilkS))
     (pad "" np_thru_hole circle (at -3.05 11.3 180) (size 1 1) (drill 1) (layers *.Cu *.Mask B.SilkS))
-    (model zap.3dshapes/GCT-MEM2055-00-190-01-A.wrl
+    (model GCT-MEM2055-00-190-01-A.wrl
       (at (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))

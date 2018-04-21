@@ -26,7 +26,7 @@ font_t *loadFntFile( char *fileName ){
     FILE *f = fopen( fileName, "rb" );
     fread( temp, 4,1,f);
     if( strncmp((char*)temp, "BMF", 3) != 0 ){
-        printf("Wrong header\n");
+        ESP_LOGE(T,"Wrong header");
         fclose( f );
         return NULL;
     }
@@ -35,11 +35,11 @@ font_t *loadFntFile( char *fileName ){
     while(1){
         blockType = 0;
         if( fread( &blockType, 1,1,f) < 1 ){
-            printf("No more data :(\n");
+            ESP_LOGV(T,"No more data");
             break;
         }
         fread( &blockSize, 1, 4, f );
-        printf("block %d of size %d\n", blockType, blockSize);
+        ESP_LOGD(T,"block %d of size %d", blockType, blockSize);
         switch( blockType ){
             case 1:
                 fDat->info = malloc( blockSize );
@@ -70,7 +70,7 @@ font_t *loadFntFile( char *fileName ){
                 break;
 
             default:
-                printf("Unknown block type: %d\n", blockType );
+                ESP_LOGW(T,"Unknown block type: %d\n", blockType );
                 fseek( f, blockSize, SEEK_CUR );
                 continue;
         }
@@ -134,7 +134,7 @@ void freeFntFile( font_t *fDat ){
 }
 
 // Loads a <prefix>.bmp and <prefix>.fnt file, to get ready for printing
-void initFont( char *filePrefix ){
+void initFont( const char *filePrefix ){
     char tempFileName[32];
     if ( g_bmpFile != NULL ){
         fclose( g_bmpFile );
@@ -176,7 +176,7 @@ void drawChar( char c, uint8_t layer, uint32_t color, uint8_t chOffset ){
 		if( charInfo != NULL ){
 			copyBmpToFbRect( g_bmpFile,
 							 &g_bmpInfoHeader,
-							 charInfo->x, 
+							 charInfo->x,
 							 charInfo->y,
 							 charInfo->width,
 							 charInfo->height,
@@ -193,9 +193,11 @@ void getStrDim( const char *str, int16_t *width, int16_t *height ){
     uint16_t w=0, h=0, temp;
     while( *str ){
         fontChar_t *charInfo = getCharInfo( g_fontInfo, *str );
-        w += charInfo->xadvance;
-        temp = charInfo->height + charInfo->yoffset;
-        if( temp > h ) h = temp;
+        if( charInfo ){
+            w += charInfo->xadvance;
+            temp = charInfo->height + charInfo->yoffset;
+            if( temp > h ) h = temp;
+        }
         str++;
     }
     if( width != NULL ){
@@ -231,16 +233,16 @@ void drawStrCentered( const char *str, uint8_t layer, uint32_t cOutline, uint32_
     if( xOff < 0 ) xOff=0;
     if( yOff < 0 ) yOff=0;
     startDrawing( layer );
-    setAll( layer, 0x00000000 );        
+    setAll( layer, 0x00000000 );
     drawStr( str, xOff, yOff, layer, cOutline, cFill );
     doneDrawing( 1 );
 }
 
 // Returns the number of consecutive `path/0.fnt` files
-int cntFntFiles( char* path ){
+int cntFntFiles( const char* path ){
     int nFiles = 0;
     char fNameBuffer[32];
-    struct stat   buffer;   
+    struct stat   buffer;
     while( 1 ){
         sprintf( fNameBuffer, "%s/%d.fnt", path, nFiles );
         if( stat(fNameBuffer, &buffer) == 0 ) {
