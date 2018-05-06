@@ -104,17 +104,25 @@ void aniClockTask(void *pvParameters){
     timeinfo.tm_min =  0;
     timeinfo.tm_hour= 18;
     char strftime_buf[64];
+    unsigned col = rand();
+    unsigned delFont=0, delCol=0;
+    cJSON *jDelay = jGet( getSettings(), "delays");
     srand(time(NULL));
     ESP_LOGI(T,"aniClockTask started");
     g_maxFnt = cntFntFiles("/SD/fnt") - 1;
     ESP_LOGI(T,"max. font file: /SD/fnt/%d.fnt", g_maxFnt );
     while(1){
-        if( timeinfo.tm_min==0 ){
-            // every hour
+        if( delFont > jGetI(jDelay,"font") ){
+            // every delays.font minutes
             g_fontNumberRequest = RAND_AB(0,g_maxFnt);
+            delFont = 0;
+        }
+        if( delCol > jGetI(jDelay,"color") ){
+            col = rand();
+            delCol = 0;
         }
         // every minute
-        if( g_fontNumberRequest >=0 ){
+        if( g_fontNumberRequest>=0 && g_fontNumberRequest<=g_maxFnt ){
             sprintf( strftime_buf, "/SD/fnt/%d", g_fontNumberRequest );
             initFont( strftime_buf );
             g_fontNumberRequest = -1;
@@ -122,9 +130,11 @@ void aniClockTask(void *pvParameters){
         time(&now);
         localtime_r(&now, &timeinfo);
         strftime(strftime_buf, sizeof(strftime_buf), "%H:%M", &timeinfo);
-        drawStrCentered( strftime_buf, 1, rand(), 0xFF000000 );
+        drawStrCentered( strftime_buf, 1, col, 0xFF000000 );
         manageBrightness( &timeinfo );
         // updateFrame();
+        delFont++;
+        delCol++;
         vTaskDelay( 1000*60 / portTICK_PERIOD_MS );
     }
     vTaskDelete( NULL );
@@ -201,6 +211,7 @@ void app_main(){
     headerEntry_t myHeader;
 
     int aniId;
+    cJSON *jDelay = jGet( getSettings(), "delays");
     while(1){
         aniId = RAND_AB( 0, fh.nAnimations-1 );
         readHeaderEntry( f, &myHeader, aniId );
@@ -225,7 +236,7 @@ void app_main(){
         uint32_t nTouched = 1;
         while( nTouched ){
             startDrawing( 2 );
-            nTouched = fadeOut( 2, RAND_AB(1,50) );
+            nTouched = fadeOut( 2, 10 );
             doneDrawing( 2 );
             // updateFrame();
             vTaskDelay( 20 / portTICK_PERIOD_MS);
@@ -233,7 +244,7 @@ void app_main(){
         startDrawing( 2 );
         setAll( 2, 0x00000000 );    //Make layer fully transparent
         doneDrawing( 2 );
-        vTaskDelay(15000 / portTICK_PERIOD_MS);
+        vTaskDelay( jGetI(jDelay,"ani")*1000 / portTICK_PERIOD_MS);
     }
     fclose(f);
 }

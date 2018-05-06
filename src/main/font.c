@@ -157,10 +157,10 @@ void initFont( const char *filePrefix ){
     }
 }
 
-uint16_t cursX=0, cursY=8;
+int cursX=0, cursY=8;
 char g_lastChar = 0;
 
-void setCur( uint16_t x, uint16_t y ){
+void setCur( int x, int y ){
 	cursX = x;
 	cursY = y;
 	g_lastChar = 0;
@@ -173,7 +173,7 @@ void drawChar( char c, uint8_t layer, uint32_t color, uint8_t chOffset ){
 	} else {
 		fontChar_t *charInfo = getCharInfo( g_fontInfo, c );
 		// int16_t k = getKerning( g_lastChar, c );
-		if( charInfo != NULL ){
+		if( charInfo ){
 			copyBmpToFbRect( g_bmpFile,
 							 &g_bmpInfoHeader,
 							 charInfo->x,
@@ -189,26 +189,18 @@ void drawChar( char c, uint8_t layer, uint32_t color, uint8_t chOffset ){
 	g_lastChar = c;
 }
 
-void getStrDim( const char *str, int16_t *width, int16_t *height ){
-    uint16_t w=0, h=0, temp;
+int getStrWidth( const char *str ){
+    int w=0;
     while( *str ){
         fontChar_t *charInfo = getCharInfo( g_fontInfo, *str );
-        if( charInfo ){
+        if( charInfo )
             w += charInfo->xadvance;
-            temp = charInfo->height + charInfo->yoffset;
-            if( temp > h ) h = temp;
-        }
         str++;
     }
-    if( width != NULL ){
-        *width = w;
-    }
-    if( height != NULL ){
-        *height = h;
-    }
+    return w;
 }
 
-void drawStr( const char *str, uint16_t x, uint16_t y, uint8_t layer, uint32_t cOutline, uint32_t cFill ){
+void drawStr( const char *str, int x, int y, uint8_t layer, uint32_t cOutline, uint32_t cFill ){
 	const char *c = str;
     ESP_LOGI(T, "(%d,%d): %s", x, y, str );
     setCur( x, y );
@@ -226,16 +218,16 @@ void drawStr( const char *str, uint16_t x, uint16_t y, uint8_t layer, uint32_t c
 }
 
 void drawStrCentered( const char *str, uint8_t layer, uint32_t cOutline, uint32_t cFill ){
-    int16_t w, h, xOff, yOff;
-    getStrDim( str, &w, &h );
+    int w, h, xOff, yOff;
+    h = g_fontInfo->common->lineHeight;
+    w = getStrWidth( str );
+    ESP_LOGI(T, "getStrDim( w = %d, h = %d )", w, h );
     xOff = (DISPLAY_WIDTH-w)/2;
     yOff = (DISPLAY_HEIGHT-h)/2;
-    if( xOff < 0 ) xOff=0;
-    if( yOff < 0 ) yOff=0;
     startDrawing( layer );
     setAll( layer, 0x00000000 );
     drawStr( str, xOff, yOff, layer, cOutline, cFill );
-    doneDrawing( 1 );
+    doneDrawing( layer );
 }
 
 // Returns the number of consecutive `path/0.fnt` files

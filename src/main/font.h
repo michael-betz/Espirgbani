@@ -67,13 +67,13 @@ fontChar_t *getCharInfo( font_t *fDat, char c );
 void freeFntFile( font_t *fDat );
 void initFont( const char *filePrefix );
 void drawChar( char c, uint8_t layer, uint32_t color, uint8_t chOffset );
-void setCur( uint16_t x, uint16_t y );
+void setCur( int x, int y );
 
 // draws a zero terminated string into `layer` at x,y with colors cOutline and cFill
-void drawStr( const char *str, uint16_t x, uint16_t y, uint8_t layer, uint32_t cOutline, uint32_t cFill );
+void drawStr( const char *str, int x, int y, uint8_t layer, uint32_t cOutline, uint32_t cFill );
 
-// returns expected width and height of the string rectangle
-void getStrDim( const char *str, int16_t *width, int16_t *height );
+// returns expected width of the string rectangle
+int getStrWidth( const char *str );
 
 // draws a zero terminated string into `layer` centered on the screen with colors cOutline and cFill
 void drawStrCentered( const char *str, uint8_t layer, uint32_t cOutline, uint32_t cFill );

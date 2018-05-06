@@ -30,7 +30,7 @@ FILE *loadBitmapFile( char *filename, bitmapFileHeader_t *bitmapFileHeader, bitm
 }
 
 // copys a rectangular area from a font bitmap to the frambuffer layer
-void copyBmpToFbRect( FILE *bmpF, bitmapInfoHeader_t *bmInfo, uint16_t xBmp, uint16_t yBmp, uint16_t w, uint16_t h, uint16_t xFb, uint16_t yFb, uint8_t layerFb, uint32_t color, uint8_t chOffset ){
+void copyBmpToFbRect( FILE *bmpF, bitmapInfoHeader_t *bmInfo, uint16_t xBmp, uint16_t yBmp, uint16_t w, uint16_t h, int xFb, int yFb, uint8_t layerFb, uint32_t color, uint8_t chOffset ){
     if ( bmpF==NULL || bmInfo==NULL )
         return;
     if( chOffset >= bmInfo->biWidth/8 ){
@@ -50,8 +50,8 @@ void copyBmpToFbRect( FILE *bmpF, bitmapInfoHeader_t *bmInfo, uint16_t xBmp, uin
     	//read the whole row
     	if( fread( rowBuffer, 1, rowSize, bmpF ) != rowSize ){
             fseek( bmpF, startPos, SEEK_SET );               // skipped over last row
-            free( rowBuffer );        
-            return; 
+            free( rowBuffer );
+            return;
         }
     	//copy one row of relevant pixels
 		for ( uint16_t colId=0; colId<w; colId++ ){
@@ -66,7 +66,10 @@ void copyBmpToFbRect( FILE *bmpF, bitmapInfoHeader_t *bmInfo, uint16_t xBmp, uin
             // } else {
             //     shade = shade > 127 ? 2*shade-255 : 0;
             // }
-            setPixelOver( layerFb, colId+xFb, h-rowId-1+yFb, (shade<<24)|scale32(shade,color) );
+            int xPixel = colId+xFb;
+            int yPixel = h-rowId-1+yFb;
+            if( xPixel < 0 || yPixel < 0 ) continue;
+            setPixelOver( layerFb, xPixel, yPixel, (shade<<24)|scale32(shade,color) );
 		}
     }
     fseek( bmpF, startPos, SEEK_SET );

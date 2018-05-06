@@ -69,7 +69,7 @@ void wsReceive(Websock *ws, char *data, int len, int flags){
         case WS_ID_FONT:
             // Set font type (quick and dirty)
             b = atoi( &data[1] );
-            if( b<g_maxFnt ){
+            if( b <= g_maxFnt ){
                 g_fontNumberRequest = b;
             }
             break;

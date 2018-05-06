@@ -16,14 +16,14 @@ Changes included in Rev 1
   * Change programming port from custom pogo-pins to a normal header
   * Add an ambient light level sensor
   * [ Re-arrange the mounting hole ] TODO
-  
+
 # SD card instructions
-Format as FAT32, then copy the following files: 
+Format as FAT32, then copy the following files:
   * `./settings.json`
   * `./runDmd.img`
   * `./fnt/{d}.fnt`
   * `./fnt/{d}_0.bmp`
-  
+
 ## example `settings.json`
 ```json
 {
@@ -40,6 +40,11 @@ Format as FAT32, then copy the following files:
             "p": 1
         }
     },
+    "delays": {
+        "font": 60,
+        "color":  10,
+        "ani":  15
+    },
     "hostname": "espirgbani",
     "wifis": {
         "<wifi-ssid>": {
@@ -52,16 +57,21 @@ __Some notes about the `power` section__
   * Switches to brightness `40` at `7:30`
   * But only if `192.168.1.208` responds to pings
   * Switches to brightness `1` at `23:00`
-  
+
+__Some notes about the `delays` section__
+  * Changes the clock font every 60 minutes
+  * Changes color of the clock font every 10 minutes
+  * Plays a new pinball animation every 15 seconds
+
 Note that, once running, the settings.json file can be edited through the web interface.
 
 ## how to get `runDmd.img`
   * Find a run-dmd image file and write it to SD card according to their instructions (HDD Raw Copy Tool and Windows required)
-  * In linux, dump the first few hundred megabytes of the SD card to a file: 
+  * In linux, dump the first few hundred megabytes of the SD card to a file:
   ```bash
   sudo dd if=/dev/sdb of=./runDmd.img bs=1M count=125
   ```
-  
+
 ## how to get the font `.bmp` and `.fnt` files
   * Find some nice fonts which look good at small size and copy the `.ttf` files into the git tree at `./dev/fonts`
   * Use [bmFont](http://www.angelcode.com/products/bmfont/) (works well with wine in linux) to generate the bitmap fonts. Good settings are provided in `dev/clockFont.bmfc`
