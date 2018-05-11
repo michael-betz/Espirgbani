@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include "driver/gpio.h"
 #include "esp_log.h"
 #include "wifi_startup.h"
 #include "web_console.h"
@@ -119,7 +120,7 @@ void aniClockTask(void *pvParameters){
             delFont = 0;
         }
         if( delCol > jGetI(jDelay,"color") ){
-            col = rand();
+            col = 0xFF000000 | rand();
             delCol = 0;
         }
         // every minute
@@ -141,6 +142,10 @@ void aniClockTask(void *pvParameters){
     vTaskDelete( NULL );
 }
 
+static void IRAM_ATTR gpio_isr_handler(void* arg){
+    wifiState = WIFI_START_HOTSPOT_MODE;
+}
+
 void app_main(){
     //------------------------------
     // Enable RAM log file
@@ -152,9 +157,9 @@ void app_main(){
     // Init rgb tiles
     //------------------------------
     init_rgb();
-    setAll( 0, 0xFF220000 );
-    setAll( 1, 0xFF002200 );
-    setAll( 2, 0xFF000022 );
+    setAll( 0, 0xFF020202 );
+    setAll( 1, 0x00000000 );
+    setAll( 2, 0x00000000 );
     updateFrame();
     g_rgbLedBrightness = 10;
 
@@ -163,6 +168,25 @@ void app_main(){
     //------------------------------
     initSpiffs();
     initSd();
+    initFont("/SD/fnt/2");
+
+    //------------------------------
+    // Flash button (access point mode)
+    //------------------------------
+    gpio_config_t io_conf;
+    //interrupt of falling edge
+    io_conf.intr_type = GPIO_PIN_INTR_NEGEDGE;
+    //bit mask of the pins, use GPIO0 here
+    io_conf.pin_bit_mask = (1<<0);
+    //set as input mode
+    io_conf.mode = GPIO_MODE_INPUT;
+    //enable pull-up mode
+    io_conf.pull_up_en = 1;
+    gpio_config( &io_conf );
+    //install gpio isr service
+    gpio_install_isr_service(0);
+    //hook isr handler for specific gpio pin
+    gpio_isr_handler_add(0, gpio_isr_handler, 0);
 
     //------------------------------
     // Startup wifi & webserver
@@ -173,7 +197,6 @@ void app_main(){
     setAll( 2, 0x00000000 );
     updateFrame();
     vTaskDelay(3000 / portTICK_PERIOD_MS);
-
     reloadSettings();
 
     //------------------------------
@@ -214,6 +237,7 @@ void app_main(){
     int aniId;
     cJSON *jDelay = jGet( getSettings(), "delays");
     while(1){
+        vTaskDelay( jGetI(jDelay,"ani")*1000 / portTICK_PERIOD_MS);
         aniId = RAND_AB( 0, fh.nAnimations-1 );
         readHeaderEntry( f, &myHeader, aniId );
         ESP_LOGD(T, "%s", myHeader.name);
@@ -245,7 +269,6 @@ void app_main(){
         startDrawing( 2 );
         setAll( 2, 0x00000000 );    //Make layer fully transparent
         doneDrawing( 2 );
-        vTaskDelay( jGetI(jDelay,"ani")*1000 / portTICK_PERIOD_MS);
     }
     fclose(f);
 }

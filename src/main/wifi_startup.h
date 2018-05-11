@@ -11,6 +11,7 @@
 
 #define SETTINGS_FILE	"/SD/settings.json"
 #define N_WIFI_TRYS		6
+#define N_HOSPOT_LOOPS  50
 #define WIFI_DELAY		10000	//[ms]
 #define DNS_TIMEOUT 	10000 	//[ms]
 
@@ -35,9 +36,9 @@ extern void wifi_conn_init(void);
 extern void wifi_disable();
 
 #define jGet( a,b)  cJSON_GetObjectItemCaseSensitive(a,b)
-#define jGetI(a,b) (cJSON_GetObjectItemCaseSensitive(a,b)->valueint)
-#define jGetD(a,b) (cJSON_GetObjectItemCaseSensitive(a,b)->valuedouble)
-#define jGetS(a,b) (cJSON_GetObjectItemCaseSensitive(a,b)->valuestring)
+#define jGetI(a,b) (jGet(a,b) ? jGet(a,b)->valueint : 0)
+#define jGetD(a,b) (jGet(a,b) ? jGet(a,b)->valuedouble : 0)
+#define jGetS(a,b) (jGet(a,b) ? jGet(a,b)->valuestring : 0)
 // Returns a fallback string on json error
 const char *jGetSD( const cJSON *j, const char *sName, const char *sDefault );
 

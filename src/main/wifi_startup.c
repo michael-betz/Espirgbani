@@ -41,7 +41,7 @@
 
 #include "app_main.h"
 #include "rgb_led_panel.h"
-
+#include "frame_buffer.h"
 #include "wifi_startup.h"
 #include "font.h"
 
@@ -278,6 +278,7 @@ void conToApMode(){
     // if succesfuls, sets wifiState to WIFI_CONNECTED
     int ret=0;
     uint16_t foundNaps=0;
+    drawStrCentered( "Scan ...", 1, 0xFF00FF00, 0xFF000000 );
     wifi_ap_record_t* foundAps = NULL;
     wifi_config_t wifi_config = {
         .sta.scan_method = WIFI_ALL_CHANNEL_SCAN,
@@ -316,8 +317,9 @@ void conToApMode(){
     xEventGroupWaitBits( wifi_event_group, CONNECTED_BIT, pdFALSE, pdTRUE, 10000/portTICK_PERIOD_MS );
     // Check if we are connected
     if( xEventGroupGetBits( wifi_event_group ) & CONNECTED_BIT ){
-        ESP_LOGI(T,"Conected to an AP. All is good :)");
+        ESP_LOGI(T,"Connected to an AP. All is good :)");
         wifiState = WIFI_CONNECTED;
+        drawStrCentered( "Con!", 1, 0xFF00FF00, 0xFF000000 );
     }
 }
 
@@ -331,6 +333,7 @@ void startHotspotMode(){
     };
     strcpy( (char*)wifi_config.ap.ssid, GET_HOSTNAME() );
     ESP_LOGI(T, "WIFI_HOTSPOT_MODE");
+    drawStrCentered( "Hspt", 1, 0xFF0000FF, 0xFF000000 );
     ESP_ERROR_CHECK( esp_wifi_stop() );
     ESP_ERROR_CHECK( esp_wifi_set_mode( WIFI_MODE_AP ) );
     ESP_ERROR_CHECK( esp_wifi_set_config( ESP_IF_WIFI_AP, &wifi_config ) );
@@ -369,6 +372,7 @@ void wifiConnectionTask(void *pvParameters){
                     vTaskDelay( 1000/portTICK_PERIOD_MS );
                 } else {
                     ESP_LOGW(T, "Wifi connection lost !!! reconnecting ...");
+                    drawStrCentered( "Discon!", 1, 0xFF0000FF, 0xFF000000 );
                     wifiState = WIFI_CON_TO_AP_MODE;
                 }
                 break;
@@ -388,7 +392,7 @@ void wifiConnectionTask(void *pvParameters){
                 //---------------------------------------------------
                 if( esp_wifi_ap_get_sta_list( &hsStas ) == ESP_OK ){
                     if ( hsStas.num == 0 ){
-                        if( ++wifiTry > N_WIFI_TRYS*3 ){
+                        if( ++wifiTry > N_HOSPOT_LOOPS ){
                             wifiTry = 0;
                             wifiState = WIFI_CON_TO_AP_MODE;
                             continue;
