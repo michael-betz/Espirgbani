@@ -1,0 +1,103 @@
+From 35dbd76d20d753fba78ddf83e8ab5f37b7f0f69f Mon Sep 17 00:00:00 2001
+From: Michael Betz <michibetz@gmail.com>
+Date: Fri, 11 May 2018 08:59:49 -0700
+Subject: [PATCH] Add fast seek option to fatfs
+
+---
+ components/fatfs/src/ffconf.h  |  2 +-
+ components/fatfs/src/vfs_fat.c | 19 ++++++++++++++++++-
+ components/sdmmc/sdmmc_cmd.c   | 12 ++++++------
+ 3 files changed, 25 insertions(+), 8 deletions(-)
+
+diff --git a/components/fatfs/src/ffconf.h b/components/fatfs/src/ffconf.h
+index 7a491655..fc2c6ec8 100644
+--- a/components/fatfs/src/ffconf.h
++++ b/components/fatfs/src/ffconf.h
+@@ -44,7 +44,7 @@
+ /* This option switches f_mkfs() function. (0:Disable or 1:Enable) */
+ 
+ 
+-#define FF_USE_FASTSEEK	0
++#define FF_USE_FASTSEEK	1
+ /* This option switches fast seek function. (0:Disable or 1:Enable) */
+ 
+ 
+diff --git a/components/fatfs/src/vfs_fat.c b/components/fatfs/src/vfs_fat.c
+index 556492e3..6c0424e8 100644
+--- a/components/fatfs/src/vfs_fat.c
++++ b/components/fatfs/src/vfs_fat.c
+@@ -24,6 +24,8 @@
+ #include "ff.h"
+ #include "diskio.h"
+ 
++#define FAST_SEEK_SIZE 512
++
+ typedef struct {
+     char fat_drive[8];  /* FAT drive name */
+     char base_path[ESP_VFS_PATH_MAX];   /* base path in VFS where partition is registered */
+@@ -298,7 +300,8 @@ static int vfs_fat_open(void* ctx, const char * path, int flags, int mode)
+         fd = -1;
+         goto out;
+     }
+-    FRESULT res = f_open(&fat_ctx->files[fd], path, fat_mode_conv(flags));
++    FIL* file = &fat_ctx->files[fd];
++    FRESULT res = f_open(file, path, fat_mode_conv(flags));
+     if (res != FR_OK) {
+         ESP_LOGD(TAG, "%s: fresult=%d", __func__, res);
+         file_cleanup(fat_ctx, fd);
+@@ -306,6 +309,16 @@ static int vfs_fat_open(void* ctx, const char * path, int flags, int mode)
+         fd = -1;
+         goto out;
+     }
++    DWORD *fastSeekBuffer = malloc( sizeof(DWORD)*FAST_SEEK_SIZE );
++    if( fastSeekBuffer != NULL ){
++        memset( fastSeekBuffer, 0, sizeof(DWORD)*FAST_SEEK_SIZE );
++        fastSeekBuffer[0] = FAST_SEEK_SIZE;
++        file->cltbl = fastSeekBuffer;
++        res = f_lseek(file, CREATE_LINKMAP);     /* Create CLMT */
++        ESP_LOGD(TAG, "%s: Enabled FAST_SEEK: %d (0=ok)", __func__, res);
++    } else {
++        ESP_LOGW(TAG, "%s: Could not allocate fast seek buffer (%d DWORDS)", __func__, FAST_SEEK_SIZE);
++    }
+ out:
+     _lock_release(&fat_ctx->lock);
+     return fd;
+@@ -365,6 +378,10 @@ static int vfs_fat_close(void* ctx, int fd)
+     _lock_acquire(&fat_ctx->lock);
+     FIL* file = &fat_ctx->files[fd];
+     FRESULT res = f_close(file);
++    if( file->cltbl != NULL ){
++        free( file->cltbl );
++        file->cltbl = NULL;
++    }
+     file_cleanup(fat_ctx, fd);
+     int rc = 0;
+     if (res != FR_OK) {
+diff --git a/components/sdmmc/sdmmc_cmd.c b/components/sdmmc/sdmmc_cmd.c
+index 7279dec4..b38575fd 100644
+--- a/components/sdmmc/sdmmc_cmd.c
++++ b/components/sdmmc/sdmmc_cmd.c
+@@ -416,14 +416,14 @@ esp_err_t sdmmc_card_init(const sdmmc_host_t* config, sdmmc_card_t* card)
+ 
+ void sdmmc_card_print_info(FILE* stream, const sdmmc_card_t* card)
+ {
+-    fprintf(stream, "Name: %s\n", card->cid.name);
+-    fprintf(stream, "Type: %s\n", (card->ocr & SD_OCR_SDHC_CAP)?"SDHC/SDXC":"SDSC");
+-    fprintf(stream, "Speed: %s\n", (card->csd.tr_speed > 25000000)?"high speed":"default speed");
+-    fprintf(stream, "Size: %lluMB\n", ((uint64_t) card->csd.capacity) * card->csd.sector_size / (1024 * 1024));
+-    fprintf(stream, "CSD: ver=%d, sector_size=%d, capacity=%d read_bl_len=%d\n",
++    ESP_LOGI( TAG, "Name: %s\n", card->cid.name);
++    ESP_LOGI( TAG, "Type: %s\n", (card->ocr & SD_OCR_SDHC_CAP)?"SDHC/SDXC":"SDSC");
++    ESP_LOGI( TAG, "Speed: %s\n", (card->csd.tr_speed > 25000000)?"high speed":"default speed");
++    ESP_LOGI( TAG, "Size: %lluMB\n", ((uint64_t) card->csd.capacity) * card->csd.sector_size / (1024 * 1024));
++    ESP_LOGI( TAG, "CSD: ver=%d, sector_size=%d, capacity=%d read_bl_len=%d\n",
+             card->csd.csd_ver,
+             card->csd.sector_size, card->csd.capacity, card->csd.read_block_len);
+-    fprintf(stream, "SCR: sd_spec=%d, bus_width=%d\n", card->scr.sd_spec, card->scr.bus_width);
++    ESP_LOGI( TAG, "SCR: sd_spec=%d, bus_width=%d\n", card->scr.sd_spec, card->scr.bus_width);
+ }
+ 
+ static void sdmmc_fix_host_flags(sdmmc_card_t* card)
+-- 
+2.17.0
+
