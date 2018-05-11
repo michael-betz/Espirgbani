@@ -68,14 +68,18 @@ void manageBrightness( struct tm *timeinfo ){
     const char *pingIpStr;
     uint32_t pingRespTime;
     ip4_addr_t ip;
+    if(( pingIpStr = jGetSD(jHi,"pingIp",NULL) )){
+        ip4addr_aton( pingIpStr, &ip);
+    } else {
+        ip.addr = 0;
+    }
     int iHi  = jGetI(jHi,"m") + jGetI(jHi,"h")*60;
     int iLo  = jGetI(jLo,"m") + jGetI(jLo,"h")*60;
     int iCur = timeinfo->tm_min + timeinfo->tm_hour*60;
     if ( iCur >= iHi && iCur < iLo ) {
         // Daylite mode
         brightNessState = BR_DAY;
-        if(( pingIpStr = jGetSD(jHi,"pingIp",NULL) )){
-            ip4addr_aton( pingIpStr, &ip);
+        if( ip.addr > 0 && ip.addr < 0xFFFFFFFF ) {
             if(( pingRespTime = isPingOk( &ip, 3000 ) )){
                 nBadPings = 0;
                 ESP_LOGD(T,"Ping response from %s in %d ms", ip4addr_ntoa(&ip), pingRespTime );
@@ -197,7 +201,6 @@ void app_main(){
     setAll( 2, 0x00000000 );
     updateFrame();
     vTaskDelay(3000 / portTICK_PERIOD_MS);
-    reloadSettings();
 
     //------------------------------
     // Set the clock / print time
