@@ -77,7 +77,7 @@ void manageBrightness( struct tm *timeinfo ){
             ip4addr_aton( pingIpStr, &ip);
             if(( pingRespTime = isPingOk( &ip, 3000 ) )){
                 nBadPings = 0;
-                ESP_LOGI(T,"Ping response from %s in %d ms", ip4addr_ntoa(&ip), pingRespTime );
+                ESP_LOGD(T,"Ping response from %s in %d ms", ip4addr_ntoa(&ip), pingRespTime );
             } else {
                 nBadPings++;
                 ESP_LOGW(T,"Ping timeout %d on %s", nBadPings, ip4addr_ntoa(&ip) );
@@ -105,13 +105,14 @@ void aniClockTask(void *pvParameters){
     timeinfo.tm_hour= 18;
     char strftime_buf[64];
     unsigned col = rand();
-    unsigned delFont=0, delCol=0;
+    unsigned delFont=~0, delCol=0;
     cJSON *jDelay = jGet( getSettings(), "delays");
     srand(time(NULL));
     ESP_LOGI(T,"aniClockTask started");
     g_maxFnt = cntFntFiles("/SD/fnt") - 1;
     ESP_LOGI(T,"max. font file: /SD/fnt/%d.fnt", g_maxFnt );
     while(1){
+        ESP_LOGD(T, " delFont=%u, json=%d", delFont, jGetI(jDelay,"font") );
         if( delFont > jGetI(jDelay,"font") ){
             // every delays.font minutes
             g_fontNumberRequest = RAND_AB(0,g_maxFnt);
