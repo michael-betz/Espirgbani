@@ -7,7 +7,7 @@
 
 static const char *T = "SD_CARD";
 
-void initSd(){    
+void initSd(){
     sdmmc_host_t host = SDSPI_HOST_DEFAULT();
     sdspi_slot_config_t slot_config = SDSPI_SLOT_CONFIG_DEFAULT();
     slot_config.gpio_miso = GPIO_SD_MISO;
@@ -19,7 +19,7 @@ void initSd(){
     // formatted in case when mounting fails.
     esp_vfs_fat_sdmmc_mount_config_t mount_config = {
         .format_if_mount_failed = false,
-        .max_files = 3	//Max number of open files
+        .max_files = 5	//Max number of open files
     };
     sdmmc_card_t* card;
     esp_err_t ret = esp_vfs_fat_sdmmc_mount("/SD", &host, &slot_config, &mount_config, &card);
