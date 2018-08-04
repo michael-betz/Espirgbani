@@ -63,6 +63,7 @@ void playAni( FILE *f, headerEntry_t *h ){
 void manageBrightness( struct tm *timeinfo ){
     static int nBadPings = 0;
     cJSON *jPow = jGet( getSettings(), "power");
+    cJSON *jDel = jGet( getSettings(), "delays");
     cJSON *jHi  = jGet( jPow, "hi");
     cJSON *jLo  = jGet( jPow, "lo");
     const char *pingIpStr;
@@ -73,6 +74,8 @@ void manageBrightness( struct tm *timeinfo ){
     } else {
         ip.addr = 0;
     }
+    int maxBadPings = jGetI(jDel, "ping");
+    if( maxBadPings <=0 ) maxBadPings = 1;
     int iHi  = jGetI(jHi,"m") + jGetI(jHi,"h")*60;
     int iLo  = jGetI(jLo,"m") + jGetI(jLo,"h")*60;
     int iCur = timeinfo->tm_min + timeinfo->tm_hour*60;
@@ -87,7 +90,7 @@ void manageBrightness( struct tm *timeinfo ){
                 nBadPings++;
                 ESP_LOGW(T,"Ping timeout %d on %s", nBadPings, ip4addr_ntoa(&ip) );
             }
-            if( nBadPings >= 5 ){
+            if( nBadPings >= maxBadPings ){
                 g_rgbLedBrightness = jGetI(jLo,"p");
             } else {
                 g_rgbLedBrightness = jGetI(jHi,"p");

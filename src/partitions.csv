@@ -1,9 +1,10 @@
-# traditional 2x 2 MB program + 65k spiffs
+# 2x 1.8 MB flash, 65 k spiffs
 # Name,   Type, SubType, Offset,   Size
-otadata,  data, ota,     0x006000, 0x002000
 # partition table        0x008000, 0x000C00
-nvs,      data, nvs,     0x009000, 0x007000
-main0, 	  app,  ota_0,	 0x010000, 0x1F0000
-main1,    app,  ota_1,   0x200000, 0x1F0000
-filesys,  data, spiffs,  0x3F0000, 0x010000
+nvs,      data, nvs,     0x009000, 0x004000
+otadata,  data, ota,     0x00d000, 0x002000
+phy_init, data, phy,     0x00f000, 0x001000
+main0,    app,  ota_0,   0x010000, 0x1C0000
+main1,    app,  ota_1,   0x1D0000, 0x1C0000
+filesys,  data, spiffs,  0x390000, 0x010000
 # End of flash           0x400000
