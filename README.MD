@@ -83,3 +83,6 @@ Note that, once running, the settings.json file can be edited through the web in
   * Use imagemagick to convert all image files to bmp format
   * Rename them to 0_0.bmp, 0.fnt;  1_0.bmp, 1.fnt, ...
   * Alternatively, run `./dev/generateFonts.sh` which should automate these steps
+
+## SD card image for the lazy-boy
+Format a SD card as FAT32 and unzip [this](https://drive.google.com/file/d/1lfijyzL747ri_gMELvENTmvxqSLXkHE8/view?usp=sharing) on it.
