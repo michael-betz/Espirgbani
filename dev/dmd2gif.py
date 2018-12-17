@@ -69,7 +69,7 @@ with open(fName, "rb") as f:
     n_ani = unpack(">H", f.read(2))[0]
     f.seek(0x1ef)
     buildStr = f.read(8).strip(b'\x00').decode("ascii")
-    print("Found", n_ani, "animations in", buildStr)
+    print("Build:", buildStr, "Converting", n_ani, "animations ...")
     for i_ani in range(n_ani):
         try:
             h = parse_header(f, i_ani)
@@ -90,6 +90,7 @@ with open(fName, "rb") as f:
                 # transparency=0xA0,
                 # disposal=2
             )
-            print(full_file_name)
+            # print(full_file_name)
         except Exception as e:
             print("Ohh snap ", e, full_file_name)
+print("done")
