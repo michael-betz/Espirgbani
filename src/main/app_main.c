@@ -164,9 +164,9 @@ void app_main(){
     // Init rgb tiles
     //------------------------------
     init_rgb();
-    setAll( 0, 0xFF020202 );
-    setAll( 1, 0x00000000 );
-    setAll( 2, 0x00000000 );
+    setAll(0, 0xFF020202);
+    setAll(1, 0x00000000);
+    setAll(2, 0x00000000);
     updateFrame();
     g_rgbLedBrightness = 10;
 
