@@ -29,15 +29,17 @@ git clone --recurse-submodules git@github.com:yetifrisstlama/libesphttpd.git
 ```
 Add the path to esp-idf to your `~/.bashrc`:
 ```bash
-export IDF_PATH=/home/michael/esp32/esp-idf
+nano ~/.bashrc
+"export IDF_PATH=/home/michael/esp32/esp-idf"
+source ~/.bashrc
 ```
-Clone Espirgbani and try to build and flash it ...
+Clone Espirgbani, build and flash it ...
 ```bash
 git clone git@github.com:yetifrisstlama/Espirgbani.git
 cd Espirgbani/src
 make
-make flash     # flash esp32 over serial port
-make web-flash # flash esp32 over wifi, set hostname in Makefile
+make flash     # program esp32 over serial port, hold the FLASH button!
+make web-flash # program esp32 over wifi, set hostname in Makefile
 ```
 ## fast-seek
 For a smoother animation playback, the fast-seek option needs to be enabled in
