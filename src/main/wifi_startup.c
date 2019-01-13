@@ -15,7 +15,7 @@
 #include "esp_spiffs.h"
 #include "esp_wifi.h"
 #include "esp_ping.h"
-#include "ping.h"
+// #include "ping.h"
 #include "nvs_flash.h"
 
 #include "libesphttpd/esp.h"
@@ -27,7 +27,8 @@
 #include "libesphttpd/cgiwebsocket.h"
 #include "libesphttpd/captdns.h"
 
-#include "apps/sntp/sntp.h"
+#include "lwip/apps/sntp.h"
+#include "ping/ping.h"
 #include "lwip/err.h"
 #include "lwip/netdb.h"
 #include "lwip/sockets.h"
@@ -477,12 +478,12 @@ esp_err_t pingResults(ping_target_id_t msgType, esp_ping_found * pf){
     return ESP_OK;
 }
 
-uint32_t isPingOk( ip4_addr_t *ip, uint32_t timeout_ms ){
+uint32_t isPingOk(ip4_addr_t *ip, uint32_t timeout_ms){
     if( !ip ) return 0;
     if (pingCallbackSema == NULL){
-        vSemaphoreCreateBinary( pingCallbackSema );
+        vSemaphoreCreateBinary(pingCallbackSema);
     }
-    xSemaphoreTake( pingCallbackSema, 0 ); // Make sure smea is not available already (must be given by pingResults)
+    xSemaphoreTake(pingCallbackSema, 0); // Make sure smea is not available already (must be given by pingResults)
     esp_ping_set_target(PING_TARGET_IP_ADDRESS,       ip,    sizeof(uint32_t));
     uint32_t x = 1;     // 1 ping per report
     esp_ping_set_target(PING_TARGET_IP_ADDRESS_COUNT, &x,     sizeof(uint32_t));

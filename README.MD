@@ -14,8 +14,38 @@ Fits inside one of the 64x32 panels.
 ### Revisions
 Changes included in Rev 1
   * Change programming port from custom pogo-pins to a normal header
-  * Add an ambient light level sensor
-  * [ Re-arrange the mounting hole ] TODO
+  * Add input for ambient light level sensor
+  * Re-arrange the mounting holes
+  * Add second footprint for a uSD card
+
+# Building
+First install the esp-idf library.
+```bash
+git clone --recurse-submodules https://github.com/espressif/esp-idf.git
+cd esp-idf
+git reset --hard b173cf28174b17f7df96c298f83c16a00d22e312
+cd components
+git clone --recurse-submodules git@github.com:yetifrisstlama/libesphttpd.git
+```
+Add the path to esp-idf to your `~/.bashrc`:
+```bash
+export IDF_PATH=/home/michael/esp32/esp-idf
+```
+Clone Espirgbani and try to build and flash it ...
+```bash
+git clone git@github.com:yetifrisstlama/Espirgbani.git
+cd Espirgbani/src
+make
+make flash     # flash esp32 over serial port
+make web-flash # flash esp32 over wifi, set hostname in Makefile
+```
+## fast-seek
+For a smoother animation playback, the fast-seek option needs to be enabled in
+the fatfs library. Use the provided .patch file ...
+```bash
+cd esp-idf
+patch -p1 -i ../Espirgbani/src/0001-Enable-FASTSEEK-option-in-FatFs.patch
+```
 
 # SD card instructions
 Format as FAT32, then copy the following files:
@@ -84,5 +114,5 @@ Note that, once running, the settings.json file can be edited through the web in
   * Rename them to 0_0.bmp, 0.fnt;  1_0.bmp, 1.fnt, ...
   * Alternatively, run `./dev/generateFonts.sh` which should automate these steps
 
-## SD card image for the lazy-boy
+## Pre-built SD card image
 Format a SD card as FAT32 and unzip [this](https://drive.google.com/file/d/1lfijyzL747ri_gMELvENTmvxqSLXkHE8/view?usp=sharing) on it.

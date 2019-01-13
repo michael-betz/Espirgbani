@@ -1,0 +1,84 @@
+From b34cd4ad3b1a634c21181ef03cb69f28df10edab Mon Sep 17 00:00:00 2001
+From: Michael Betz <michibetz@gmail.com>
+Date: Sun, 13 Jan 2019 13:49:33 -0800
+Subject: [PATCH] Enable FASTSEEK option in FatFs
+
+---
+ components/fatfs/src/ffconf.h  |  2 +-
+ components/fatfs/src/vfs_fat.c | 19 +++++++++++++++++--
+ 2 files changed, 18 insertions(+), 3 deletions(-)
+
+diff --git a/components/fatfs/src/ffconf.h b/components/fatfs/src/ffconf.h
+index 9513b5160..36051ef16 100644
+--- a/components/fatfs/src/ffconf.h
++++ b/components/fatfs/src/ffconf.h
+@@ -44,7 +44,7 @@
+ /* This option switches f_mkfs() function. (0:Disable or 1:Enable) */
+ 
+ 
+-#define FF_USE_FASTSEEK	0
++#define FF_USE_FASTSEEK	1
+ /* This option switches fast seek function. (0:Disable or 1:Enable) */
+ 
+ 
+diff --git a/components/fatfs/src/vfs_fat.c b/components/fatfs/src/vfs_fat.c
+index ea74c82ee..284edebdf 100644
+--- a/components/fatfs/src/vfs_fat.c
++++ b/components/fatfs/src/vfs_fat.c
+@@ -24,6 +24,8 @@
+ #include "ff.h"
+ #include "diskio.h"
+ 
++#define FAST_SEEK_SIZE 512
++
+ typedef struct {
+     char fat_drive[8];  /* FAT drive name */
+     char base_path[ESP_VFS_PATH_MAX];   /* base path in VFS where partition is registered */
+@@ -312,7 +314,8 @@ static int vfs_fat_open(void* ctx, const char * path, int flags, int mode)
+         errno = ENFILE;
+         return -1;
+     }
+-    FRESULT res = f_open(&fat_ctx->files[fd], path, fat_mode_conv(flags));
++    FIL* file = &fat_ctx->files[fd];
++    FRESULT res = f_open(file, path, fat_mode_conv(flags));
+     if (res != FR_OK) {
+         file_cleanup(fat_ctx, fd);
+         _lock_release(&fat_ctx->lock);
+@@ -320,6 +323,16 @@ static int vfs_fat_open(void* ctx, const char * path, int flags, int mode)
+         errno = fresult_to_errno(res);
+         return -1;
+     }
++    DWORD *fastSeekBuffer = malloc(sizeof(DWORD) * FAST_SEEK_SIZE);
++    if (fastSeekBuffer != NULL) {
++        memset(fastSeekBuffer, 0, sizeof(DWORD) * FAST_SEEK_SIZE);
++        fastSeekBuffer[0] = FAST_SEEK_SIZE;
++        file->cltbl = fastSeekBuffer;
++        res = f_lseek(file, CREATE_LINKMAP);     // Create CLMT
++        ESP_LOGD(TAG, "%s: Enabled FAST_SEEK: %d (0 = ok)", __func__, res);
++    } else {
++        ESP_LOGW(TAG, "%s: FAST_SEEK buffer error (%d DWORDS)", __func__, FAST_SEEK_SIZE);
++    }
+     // O_APPEND need to be stored because it is not compatible with FA_OPEN_APPEND:
+     //  - FA_OPEN_APPEND means to jump to the end of file only after open()
+     //  - O_APPEND means to jump to the end only before each write()
+@@ -393,6 +406,8 @@ static int vfs_fat_close(void* ctx, int fd)
+     _lock_acquire(&fat_ctx->lock);
+     FIL* file = &fat_ctx->files[fd];
+     FRESULT res = f_close(file);
++    free(file->cltbl);
++    file->cltbl = NULL;
+     file_cleanup(fat_ctx, fd);
+     _lock_release(&fat_ctx->lock);
+     int rc = 0;
+@@ -760,7 +775,7 @@ static int vfs_fat_truncate(void* ctx, const char *path, off_t length)
+     FIL* file;
+ 
+     int ret = 0;
+-    
++
+     vfs_fat_ctx_t* fat_ctx = (vfs_fat_ctx_t*) ctx;
+ 
+     _lock_acquire(&fat_ctx->lock);
+-- 
+2.17.1
+

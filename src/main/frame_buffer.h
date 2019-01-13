@@ -1,5 +1,6 @@
 #ifndef FRAME_BUFFER_H
 #define FRAME_BUFFER_H
+#include <stdint.h>
 #include "rgb_led_panel.h"
 
 #define N_LAYERS	3
