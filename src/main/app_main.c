@@ -157,8 +157,8 @@ void app_main(){
     //------------------------------
     // Enable RAM log file
     //------------------------------
-    // esp_log_level_set( "*", ESP_LOG_INFO );
-    esp_log_set_vprintf( wsDebugPrintf );
+    esp_log_level_set("*", ESP_LOG_WARN);
+    esp_log_set_vprintf(wsDebugPrintf);
 
     //------------------------------
     // Init rgb tiles
