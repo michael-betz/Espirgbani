@@ -164,10 +164,6 @@ void app_main(){
     // Init rgb tiles
     //------------------------------
     init_rgb();
-    setAll(0, 0xFF020202);
-    setAll(1, 0x00000000);
-    setAll(2, 0x00000000);
-    updateFrame();
     g_rgbLedBrightness = 10;
 
     //------------------------------
@@ -176,6 +172,9 @@ void app_main(){
     initSpiffs();
     initSd();
     initFont("/SD/fnt/2");
+    setAll(2, 0x00000000);
+    drawStrCentered("HelloWrld", 1, 0xFF222222, 0xFF000000);
+    updateFrame();
 
     //------------------------------
     // Flash button (access point mode)
@@ -201,7 +200,6 @@ void app_main(){
     ESP_LOGI(T,"Starting network infrastructure ...");
     wifi_conn_init();
     xEventGroupWaitBits(wifi_event_group, CONNECTED_BIT, 0, 0, 20000/portTICK_PERIOD_MS);
-    setAll( 2, 0x00000000 );
     updateFrame();
     vTaskDelay(3000 / portTICK_PERIOD_MS);
 

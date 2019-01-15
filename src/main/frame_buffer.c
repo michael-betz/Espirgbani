@@ -20,12 +20,14 @@ EventGroupHandle_t layersDoneDrawingFlags = NULL;
 
 // framebuffer with `N_LAYERS` in MSB ABGR LSB format
 // Colors are premultiplied with their alpha values for easiser compositing
-uint32_t g_frameBuff[N_LAYERS][DISPLAY_WIDTH*DISPLAY_HEIGHT]; 
+uint32_t g_frameBuff[N_LAYERS][DISPLAY_WIDTH*DISPLAY_HEIGHT];
 
 void initFb(){
 	layersDoneDrawingFlags = xEventGroupCreate();
-	for( int i=0; i<N_LAYERS; i++ )
-		xEventGroupSetBits( layersDoneDrawingFlags, (1<<i) );
+	for( int i=0; i<N_LAYERS; i++ ) {
+        xEventGroupSetBits(layersDoneDrawingFlags, (1<<i));
+        setAll(i, SRGBA(0, 0, 0, 0xFF));
+    }
 }
 
 void startDrawing( uint8_t layer ){
@@ -53,7 +55,7 @@ void doneUpdating(){
 	xEventGroupSetBits( layersDoneDrawingFlags, bitFlags );	// New drawings ok
 }
 
-//Get a blended pixel from the N layers of frameBuffer, 
+//Get a blended pixel from the N layers of frameBuffer,
 // assuming the image is a DISPLAY_WIDTHx32 8A8R8G8B image. Color values are premultipleid with alpha
 // Returns it as an uint32 with the lower 24 bits containing the RGB values.
 uint32_t getBlendedPixel( int x, int y ) {

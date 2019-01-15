@@ -279,7 +279,8 @@ void conToApMode(){
     // if succesfuls, sets wifiState to WIFI_CONNECTED
     int ret=0;
     uint16_t foundNaps=0;
-    drawStrCentered( "Scan ...", 1, 0xFF00FF00, 0xFF000000 );
+    drawStrCentered( "Scan ...", 1, SRGBA(0xFF, 0xFF, 0, 0), SRGBA(0, 0, 0, 0));
+    updateFrame();
     wifi_ap_record_t* foundAps = NULL;
     wifi_config_t wifi_config = {
         .sta.scan_method = WIFI_ALL_CHANNEL_SCAN,

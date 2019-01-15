@@ -10,7 +10,7 @@
 
 static const char *T = "RGB_LED_PANEL";
 
-int g_rgbLedBrightness = 16;
+int g_rgbLedBrightness = 1;
 //which buffer is the backbuffer, as in, which one is not active so we can write to it
 int backbuf_id = 0;
 //Internal double buffered array of bitPLanes
@@ -21,19 +21,19 @@ void init_rgb(){
     initFb();
     i2s_parallel_buffer_desc_t bufdesc[2][1<<BITPLANE_CNT];
     i2s_parallel_config_t cfg={
-        .gpio_bus={ GPIO_A, GPIO_B, GPIO_C, GPIO_D, GPIO_OE, GPIO_LAT, GPIO_R0, GPIO_G0, GPIO_B0, GPIO_R1, GPIO_G1, GPIO_B1, -1, -1, -1, -1 },
+        .gpio_bus={GPIO_A, GPIO_B, GPIO_C, GPIO_D, GPIO_OE, GPIO_LAT, GPIO_R0, GPIO_G0, GPIO_B0, GPIO_R1, GPIO_G1, GPIO_B1, -1, -1, -1, -1},
         .gpio_clk=GPIO_CLK,
         .bits=I2S_PARALLEL_BITS_16,
         // .clkspeed_hz=20*1000*1000,  //not used as changing it causes flicker anyway
         .bufa=bufdesc[0],
         .bufb=bufdesc[1],
     };
-    
+
     for (int i=0; i<BITPLANE_CNT; i++) {
         for (int j=0; j<2; j++) {
-            bitplane[j][i]=heap_caps_malloc(BITPLANE_SZ*2, MALLOC_CAP_DMA);
+            bitplane[j][i] = heap_caps_malloc(BITPLANE_SZ*2, MALLOC_CAP_DMA);
             assert(bitplane[j][i] && "Can't allocate bitplane memory");
-            memset( bitplane[j][i], 0, BITPLANE_SZ*2 );
+            memset(bitplane[j][i], 0, BITPLANE_SZ*2);
         }
     }
 
@@ -57,8 +57,8 @@ void init_rgb(){
     }
 
     //End markers
-    bufdesc[0][((1<<BITPLANE_CNT)-1)].memory=NULL;
-    bufdesc[1][((1<<BITPLANE_CNT)-1)].memory=NULL;
+    bufdesc[0][((1<<BITPLANE_CNT)-1)].memory = NULL;
+    bufdesc[1][((1<<BITPLANE_CNT)-1)].memory = NULL;
 
     //Setup I2S
     i2s_parallel_setup(&I2S1, &cfg);
