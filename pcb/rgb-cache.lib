@@ -7,7 +7,7 @@ DEF Connector_Generic_Conn_01x02 J 0 40 Y N 1 F N
 F0 "J" 0 100 50 H V C CNN
 F1 "Connector_Generic_Conn_01x02" 0 -200 50 H V C CNN
 F2 "" 0 0 50 H I C CNN
-F3 "" 0 0 50 H I C CNN
+F3 "~" 0 0 50 H I C CNN
 $FPLIST
  Connector*:*_1x??_*
 $ENDFPLIST
@@ -26,7 +26,7 @@ DEF Connector_Generic_Conn_02x08_Odd_Even J 0 40 Y N 1 F N
 F0 "J" 50 400 50 H V C CNN
 F1 "Connector_Generic_Conn_02x08_Odd_Even" 50 -500 50 H V C CNN
 F2 "" 0 0 50 H I C CNN
-F3 "" 0 0 50 H I C CNN
+F3 "~" 0 0 50 H I C CNN
 $FPLIST
  Connector*:*_2x??_*
 $ENDFPLIST
@@ -73,9 +73,9 @@ DEF Device_C C 0 10 N Y 1 F N
 F0 "C" 25 100 50 H V L CNN
 F1 "Device_C" 25 -100 50 H V L CNN
 F2 "" 38 -150 50 H I C CNN
-F3 "" 0 0 50 H I C CNN
+F3 "~" 0 0 50 H I C CNN
 $FPLIST
- *:C_*
+ C_*
 $ENDFPLIST
 DRAW
 P 2 0 1 20 -80 -30 80 -30 N
@@ -91,9 +91,9 @@ DEF Device_R R 0 0 N Y 1 F N
 F0 "R" 80 0 50 V V C CNN
 F1 "Device_R" 0 0 50 V V C CNN
 F2 "" -70 0 50 V I C CNN
-F3 "" 0 0 50 H I C CNN
+F3 "~" 0 0 50 H I C CNN
 $FPLIST
- *:R_*
+ R_*
 $ENDFPLIST
 DRAW
 S -40 -100 40 100 0 1 10 N
@@ -184,8 +184,7 @@ DEF myStuff_LM317EMP U 0 40 Y Y 1 F N
 F0 "U" -200 200 50 H V C CNN
 F1 "myStuff_LM317EMP" 0 200 50 H V L CNN
 F2 "SOT-223" 0 100 50 H V C CIN
-F3 "" 0 0 50 H V C CNN
-ALIAS LM317AEMP
+F3 "http://www.national.com/ds/LM/LM117.pdf" 0 0 50 H V C CNN
 $FPLIST
  SOT*
 $ENDFPLIST
@@ -268,21 +267,6 @@ X RTS 6 550 100 200 L 50 50 1 1 O
 ENDDRAW
 ENDDEF
 #
-# power_+3.3V
-#
-DEF power_+3.3V #PWR 0 0 Y Y 1 F P
-F0 "#PWR" 0 -150 50 H I C CNN
-F1 "power_+3.3V" 0 140 50 H V C CNN
-F2 "" 0 0 50 H I C CNN
-F3 "" 0 0 50 H I C CNN
-DRAW
-P 2 0 1 0 -30 50 0 100 N
-P 2 0 1 0 0 0 0 100 N
-P 2 0 1 0 0 100 30 50 N
-X +3V3 1 0 0 0 U 50 50 1 1 W N
-ENDDRAW
-ENDDEF
-#
 # power_+3V3
 #
 DEF power_+3V3 #PWR 0 0 Y Y 1 F P
@@ -290,7 +274,6 @@ F0 "#PWR" 0 -150 50 H I C CNN
 F1 "power_+3V3" 0 140 50 H V C CNN
 F2 "" 0 0 50 H I C CNN
 F3 "" 0 0 50 H I C CNN
-ALIAS +3.3V
 DRAW
 P 2 0 1 0 -30 50 0 100 N
 P 2 0 1 0 0 0 0 100 N
@@ -333,7 +316,7 @@ DEF power_PWR_FLAG #FLG 0 0 N N 1 F P
 F0 "#FLG" 0 75 50 H I C CNN
 F1 "power_PWR_FLAG" 0 150 50 H V C CNN
 F2 "" 0 0 50 H I C CNN
-F3 "" 0 0 50 H I C CNN
+F3 "~" 0 0 50 H I C CNN
 DRAW
 P 6 0 1 0 0 0 0 50 -40 75 0 100 40 75 0 50 N
 X pwr 1 0 0 0 U 50 50 0 0 w
