@@ -133,5 +133,6 @@ Note that, once running, the settings.json file can be edited through the web in
   * Rename them to 0_0.bmp, 0.fnt;  1_0.bmp, 1.fnt, ...
   * Alternatively, run `./dev/generateFonts.sh` which should automate these steps
 
-## Pre-built SD card image
-Format a SD card as FAT32 and unzip [this](https://drive.google.com/file/d/1lfijyzL747ri_gMELvENTmvxqSLXkHE8/view?usp=sharing) on it.
+## Pre-built binaries (TLDR!)
+Prebuilt firmware binaries for the ESP32 and the files for the (FAT32) SD card are available here:
+https://github.com/yetifrisstlama/Espirgbani/releases/tag/v1.0

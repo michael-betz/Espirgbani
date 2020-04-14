@@ -17,12 +17,12 @@ web-flash: $(APP_BIN)
 	@echo "Flashing app to http POST ..."
 	curl -X POST --data-binary @$(APP_BIN) http://espirgbani/flash/upload; curl http://espirgbani/reboot
 
-espirgbani.tar.gz:
+espirgbani.zip:
 	cp build/ota_data_initial.bin bin
 	cp build/bootloader/bootloader.bin bin
 	cp build/espirgbani.bin bin
 	cp build/partitions.bin bin
-	(cd bin && tar -vczf ../espirgbani.tar.gz *)
+	zip -r espirgbani_firmware.zip bin
 
 
 .PHONY: spiffs.img, flashSpiffs
