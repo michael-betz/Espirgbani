@@ -19,21 +19,32 @@ Changes included in Rev 1
   * Add second footprint for a uSD card
 
 # Building
-First install the esp-idf library.
+Unfortunately the projects which I based this software on are either completely obsolete or they moved on a lot. Building still works (as of April 2020) but only when using exactly the versions and git commits as specified below.
+
+install [version 5.2.0 of `xtensa-esp32-elf` toolchain](https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz) and put it in your `PATH`.
+
 ```bash
-git clone --recurse-submodules https://github.com/espressif/esp-idf.git
+$ xtensa-esp32-elf-gcc --version
+xtensa-esp32-elf-gcc (crosstool-NG crosstool-ng-1.22.0-80-g6c4433a) 5.2.0
+Copyright (C) 2015 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+```
+
+install the esp-idf library.
+```bash
+git clone https://github.com/espressif/esp-idf.git
 cd esp-idf
-git reset --hard b173cf28174b17f7df96c298f83c16a00d22e312
+git checkout b173cf28174b17f7df96c298f83c16a00d22e312
+git submodule init
+git submodule update
 cd components
 git clone --recurse-submodules git@github.com:yetifrisstlama/libesphttpd.git
+export IDF_PATH=<insert_path>/esp-idf
 ```
-Add the path to esp-idf to your `~/.bashrc`:
-```bash
-nano ~/.bashrc
-"export IDF_PATH=/home/michael/esp32/esp-idf"
-source ~/.bashrc
-```
+
 Clone Espirgbani, build and flash it ...
+
 ```bash
 git clone git@github.com:yetifrisstlama/Espirgbani.git
 cd Espirgbani/src
@@ -41,6 +52,7 @@ make
 make flash     # program esp32 over serial port, hold the FLASH button!
 make web-flash # program esp32 over wifi, set hostname in Makefile
 ```
+
 ## fast-seek
 For a smoother animation playback, the fast-seek option needs to be enabled in
 the fatfs library. Use the provided .patch file ...
@@ -61,22 +73,24 @@ Format as FAT32, then copy the following files:
 {
     "power": {
         "hi": {
-            "h": 7,
-            "m": 30,
-            "p": 40,
+            "h": 9,
+            "m": 0,
+            "p": 90,
             "pingIp": "192.168.1.208"
         },
         "lo": {
-            "h": 23,
-            "m": 0,
+            "h": 22,
+            "m": 45,
             "p": 1
         }
     },
     "delays": {
-        "font": 60,
-        "color":  10,
-        "ani":  15
+        "font":  60,
+        "color": 10,
+        "ani":   15,
+        "ping":  60
     },
+    "timezone": "PST8PDT,M3.2.0,M11.1.0",
     "hostname": "espirgbani",
     "wifis": {
         "<wifi-ssid>": {
@@ -86,14 +100,17 @@ Format as FAT32, then copy the following files:
 }
 ```
 __Some notes about the `power` section__
-  * Switches to brightness `40` at `7:30`
+  * Switches to brightness `90` at `9:00`
   * But only if `192.168.1.208` responds to pings
-  * Switches to brightness `1` at `23:00`
+  * Switches to brightness `1` at `22:45`
 
 __Some notes about the `delays` section__
   * Changes the clock font every 60 minutes
   * Changes color of the clock font every 10 minutes
   * Plays a new pinball animation every 15 seconds
+  * tries to ping `pingIp` every 60 seconds
+
+__timezone__ is the local timezone in [TZ format](https://www.gnu.org/software/libc/manual/html_node/TZ-Variable.html). Look it up [here](https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv).
 
 Note that, once running, the settings.json file can be edited through the web interface.
 

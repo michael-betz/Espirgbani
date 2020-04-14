@@ -157,7 +157,7 @@ void app_main(){
     //------------------------------
     // Enable RAM log file
     //------------------------------
-    esp_log_level_set("*", ESP_LOG_WARN);
+    esp_log_level_set("*", ESP_LOG_INFO);
     esp_log_set_vprintf(wsDebugPrintf);
 
     //------------------------------
@@ -207,7 +207,9 @@ void app_main(){
     // Set the clock / print time
     //------------------------------
     // Set timezone to Eastern Standard Time and print local time
-    setenv("TZ", "PST8PDT", 1);
+    const char *tz_str = jGetSD(getSettings(), "timezone", "PST8PDT");
+    ESP_LOGI(T,"Setting timezone to TZ = %s", tz_str);
+    setenv("TZ", tz_str, 1);
     tzset();
     time_t now = 0;
     struct tm timeinfo = { 0 };

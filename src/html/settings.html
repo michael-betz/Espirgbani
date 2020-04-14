@@ -65,7 +65,7 @@
         textArea.selectionStart = pos;
         textArea.selectionEnd = pos;
         tStat.innerHTML = "<font color=#FF8888>" + e.message + "</font>";
-      }     
+      }
   }
 
 window.addEventListener("load", init, false);
@@ -78,6 +78,7 @@ window.addEventListener("load", init, false);
   <br>
   <button id="bnV" class="inline" onclick="prettyPrint();">Verify</button>
   <button id="bnA" class="inline" onclick="writeFile();">Apply</button>
+  <button id="bnR" class="inline" onclick=window.location.href='/reboot'>Reboot</button>
   <p id="tStat" class="inline"></p>
 </div>
 </body>
