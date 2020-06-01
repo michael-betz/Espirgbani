@@ -7,11 +7,11 @@
 
 //My display has each row swapped with its neighbour (so the rows are 2-1-4-3-6-5-8-7-...). If your display
 //is more sane, uncomment this to get a good image.
-#define DISPLAY_ROWS_SWAPPED 1
+// #define DISPLAY_ROWS_SWAPPED 1
 
 // reduces flicker on my panels, seems to break other panels
 // as a side-effect, does the same as #define DISPLAY_ROWS_SWAPPED 1
-// #define FLICKER_HACK 1
+#define FLICKER_HACK 1
 
 //This is the bit depth, per RGB subpixel, of the data that is sent to the display.
 //The effective bit depth (in computer pixel terms) is less because of the PWM correction. With

@@ -96,7 +96,7 @@ void updateFrame(){
 #endif
                 int v=lbits;
                 //Do not show image while the line bits are changing
-                if (fx<1 || fx>=g_rgbLedBrightness) v|=BIT_OE;
+                if (fx<1 || fx>=g_rgbLedBrightness + 8) v|=BIT_OE;
                 if (fx==(DISPLAY_WIDTH-2)) v|=BIT_LAT; //latch on second-to-last bit... why not last bit? Dunno, probably a timing thing.
 
                 int c1 = getBlendedPixel(x, y);
