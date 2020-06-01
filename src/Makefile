@@ -21,11 +21,11 @@ web-flash: $(APP_BIN)
 	curl -X POST --data-binary @$(APP_BIN) http://espirgbani/flash/upload; curl http://espirgbani/reboot
 
 espirgbani.zip:
-	cp build/ota_data_initial.bin bin
-	cp build/bootloader/bootloader.bin bin
-	cp build/espirgbani.bin bin
-	cp build/partitions.bin bin
-	zip -r espirgbani_firmware.zip bin
+	cp build/ota_data_initial.bin bin/
+	cp build/bootloader/bootloader.bin bin/
+	cp build/espirgbani.bin bin/
+	cp build/partitions.bin bin/
+	zip -r espirgbani_firmware.zip bin/
 
 
 .PHONY: spiffs.img, flashSpiffs
