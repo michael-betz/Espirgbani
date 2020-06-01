@@ -95,9 +95,10 @@ void updateFrame(){
                 int x=fx;
 #endif
                 int v=lbits;
-                //Do not show image while the line bits are changing
+                // Do not show image while the line bits are changing
                 if (fx<1 || fx>=g_rgbLedBrightness + 8) v|=BIT_OE;
-                if (fx==(DISPLAY_WIDTH-2)) v|=BIT_LAT; //latch on second-to-last bit... why not last bit? Dunno, probably a timing thing.
+                // latch on last bit... note that spritetm needs to latch on DISPLAY_WIDTH - 2
+                if (fx==(DISPLAY_WIDTH-1)) v|=BIT_LAT;
 
                 int c1 = getBlendedPixel(x, y);
                 int c2 = getBlendedPixel(x, y+16);

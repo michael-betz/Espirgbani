@@ -2,10 +2,8 @@
 # This is a project Makefile. It is assumed the directory this Makefile resides in is a
 # project subdirectory.
 #
-
-PATH += :${HOME}/esp/xtensa-esp32-elf/bin
-IDF_PATH = ${HOME}/esp/esp-idf
-
+# call with
+# $ PATH=$PATH:${HOME}/esp/xtensa-esp32-elf/bin IDF_PATH=${HOME}/esp/esp-idf make
 PROJECT_NAME := espirgbani
 
 include $(IDF_PATH)/make/project.mk
