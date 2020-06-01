@@ -159,6 +159,7 @@ void app_main(){
     //------------------------------
     esp_log_level_set("*", ESP_LOG_INFO);
     esp_log_set_vprintf(wsDebugPrintf);
+    srand(esp_random());
 
     //------------------------------
     // Init rgb tiles
