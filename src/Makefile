@@ -3,6 +3,9 @@
 # project subdirectory.
 #
 
+PATH += :${HOME}/esp/xtensa-esp32-elf/bin
+IDF_PATH = ${HOME}/esp/esp-idf
+
 PROJECT_NAME := espirgbani
 
 include $(IDF_PATH)/make/project.mk

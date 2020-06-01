@@ -25,8 +25,9 @@
 #include "soc/i2s_struct.h"
 #include "soc/i2s_reg.h"
 #include "driver/periph_ctrl.h"
-#include "soc/io_mux_reg.h"
+#include "driver/gpio.h"
 #include "rom/lldesc.h"
+#include "soc/io_mux_reg.h"
 #include "esp_heap_caps.h"
 #include "i2s_parallel.h"
 
@@ -112,14 +113,14 @@ void i2s_parallel_setup(i2s_dev_t *dev, const i2s_parallel_config_t *cfg) {
         }
         sig_clk=I2S1O_WS_OUT_IDX;
     }
-    
+
     //Route the signals
     for (int x=0; x<cfg->bits; x++) {
         gpio_setup_out(cfg->gpio_bus[x], sig_data_base+x);
     }
     //ToDo: Clk/WS may need inversion?
     gpio_setup_out(cfg->gpio_clk, sig_clk);
-    
+
     //Power on dev
     if (dev==&I2S0) {
         periph_module_enable(PERIPH_I2S0_MODULE);
@@ -131,50 +132,47 @@ void i2s_parallel_setup(i2s_dev_t *dev, const i2s_parallel_config_t *cfg) {
     dev->conf.tx_reset=1; dev->conf.tx_reset=0;
     dma_reset(dev);
     fifo_reset(dev);
-    
+
     //Enable LCD mode
     dev->conf2.val=0;
     dev->conf2.lcd_en=1;
-    //Data updated on clk rising edge
-    dev->conf2.lcd_tx_wrx2_en = 1;
-    dev->conf2.lcd_tx_sdx2_en = 0;
-    
+
     dev->sample_rate_conf.val=0;
     dev->sample_rate_conf.rx_bits_mod=cfg->bits;
     dev->sample_rate_conf.tx_bits_mod=cfg->bits;
-    dev->sample_rate_conf.rx_bck_div_num=4;
+    dev->sample_rate_conf.rx_bck_div_num=4; //ToDo: Unsure about what this does...
     dev->sample_rate_conf.tx_bck_div_num=4;
-    
+
     dev->clkm_conf.val=0;
     dev->clkm_conf.clka_en=0;
-    dev->clkm_conf.clkm_div_a=0;
-    dev->clkm_conf.clkm_div_b=0;
+    dev->clkm_conf.clkm_div_a=63;
+    dev->clkm_conf.clkm_div_b=63;
     //We ignore the possibility for fractional division here.
-    dev->clkm_conf.clkm_div_num=4;
-    
+    dev->clkm_conf.clkm_div_num=80000000L/cfg->clkspeed_hz;
+
     dev->fifo_conf.val=0;
     dev->fifo_conf.rx_fifo_mod_force_en=1;
     dev->fifo_conf.tx_fifo_mod_force_en=1;
-    dev->fifo_conf.rx_fifo_mod=0;
-    dev->fifo_conf.tx_fifo_mod=0;
-    dev->fifo_conf.rx_data_num=32; //Thresholds. 
+    dev->fifo_conf.tx_fifo_mod=1;
+    dev->fifo_conf.tx_fifo_mod=1;
+    dev->fifo_conf.rx_data_num=32; //Thresholds.
     dev->fifo_conf.tx_data_num=32;
     dev->fifo_conf.dscr_en=1;
-    
+
     dev->conf1.val=0;
     dev->conf1.tx_stop_en=0;
     dev->conf1.tx_pcm_bypass=1;
-    
+
     dev->conf_chan.val=0;
-    dev->conf_chan.tx_chan_mod=0;
-    dev->conf_chan.rx_chan_mod=0;
-    
+    dev->conf_chan.tx_chan_mod=1;
+    dev->conf_chan.rx_chan_mod=1;
+
     //Invert ws to be active-low... ToDo: make this configurable
     dev->conf.tx_right_first=1;
     dev->conf.rx_right_first=1;
-    
+
     dev->timing.val=0;
-    
+
     //Allocate DMA descriptors
     i2s_state[i2snum(dev)]=malloc(sizeof(i2s_parallel_state_t));
     i2s_parallel_state_t *st=i2s_state[i2snum(dev)];
@@ -182,17 +180,17 @@ void i2s_parallel_setup(i2s_dev_t *dev, const i2s_parallel_config_t *cfg) {
     st->desccount_b=calc_needed_dma_descs_for(cfg->bufb);
     st->dmadesc_a=heap_caps_malloc(st->desccount_a*sizeof(lldesc_t), MALLOC_CAP_DMA);
     st->dmadesc_b=heap_caps_malloc(st->desccount_b*sizeof(lldesc_t), MALLOC_CAP_DMA);
-    
+
     //and fill them
     fill_dma_desc(st->dmadesc_a, cfg->bufa);
     fill_dma_desc(st->dmadesc_b, cfg->bufb);
-    
+
     //Reset FIFO/DMA -> needed? Doesn't dma_reset/fifo_reset do this?
     dev->lc_conf.in_rst=1; dev->lc_conf.out_rst=1; dev->lc_conf.ahbm_rst=1; dev->lc_conf.ahbm_fifo_rst=1;
     dev->lc_conf.in_rst=0; dev->lc_conf.out_rst=0; dev->lc_conf.ahbm_rst=0; dev->lc_conf.ahbm_fifo_rst=0;
     dev->conf.tx_reset=1; dev->conf.tx_fifo_reset=1; dev->conf.rx_fifo_reset=1;
     dev->conf.tx_reset=0; dev->conf.tx_fifo_reset=0; dev->conf.rx_fifo_reset=0;
-    
+
     //Start dma on front buffer
     dev->lc_conf.val=I2S_OUT_DATA_BURST_EN | I2S_OUTDSCR_BURST_EN | I2S_OUT_DATA_BURST_EN;
     dev->out_link.addr=((uint32_t)(&st->dmadesc_a[0]));
