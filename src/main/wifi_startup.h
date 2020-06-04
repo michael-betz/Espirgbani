@@ -35,17 +35,6 @@ extern wifiState_t wifiState;
 extern void wifi_conn_init(void);
 extern void wifi_disable();
 
-#define jGet(a, b) (cJSON_GetObjectItemCaseSensitive(a, b))
-#define jGetI(a,b) (jGet(a,b) ? jGet(a,b)->valueint : 0)
-#define jGetD(a,b) (jGet(a,b) ? jGet(a,b)->valuedouble : 0)
-#define jGetS(a,b) (jGet(a,b) ? jGet(a,b)->valuestring : 0)
-// Returns a fallback string on json error
-const char *jGetSD( const cJSON *j, const char *sName, const char *sDefault );
-
-// Returns the `settings.json` singleton object
-cJSON *getSettings();
-// Reloads the settings singleton
-void reloadSettings();
 // The webserver callbakc
 CgiStatus cgiReloadSettings(HttpdConnData *connData);
 
