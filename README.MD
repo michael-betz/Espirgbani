@@ -135,6 +135,8 @@ controls delays between random animations, color and font changes.
   * Plays a new pinball animation every 15 seconds
   * tries to ping `pingIp` every 60 seconds
 
+__log_level__ is the logging level for the serial port and the web-console on startup. Can be one of the following letters: `E = ERROR`, `W = WARN`, `I = INFO`, `D = DEBUG`, `V = VERBOSE`
+
 __timezone__ is the local timezone in [TZ format](https://www.gnu.org/software/libc/manual/html_node/TZ-Variable.html). Look it up [here](https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv).
 
 Note that once running and connected to the wifi, the settings.json file can be edited through the web interface.
