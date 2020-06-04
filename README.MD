@@ -112,13 +112,13 @@ Format as FAT32, then copy the following files:
 __the `panel` section__
 Not all LED panels are the same. Here the timing parameters of the I2S panel driver can be configured.
 
-  * `test_pattern` is > 0: enters a LED panel test mode instead of normal operation
-  * `tp_brightness`: brightness of the test pattern, from 1 to 127. Current draw gets ridiculous for the higher values.
-  * `is_clk_inverted` = 0: data changes on clock rising edge, `is_clk_inverted` = 1: data is stable on clock rising edge (most panels need the latter)
-  * when `column_swap` > 0: swap pairs of columns
-  * when `latch_offset` = 0: latch row-data with last pixel. For positive / negative numbers the latching happens n clock cycles earlier / later. Shifts the image horizontally.
-  * `extra_blank` adds N additional delay cycles after latching before enabling the LEDs to prevent ghosting artifacts from one row to another.
-  * `clkm_div_num` sets the I2S clock divider from 1 to 128. Set it too high and get flicker,  too low get ghost pixels. 4 = 8 MHz pixel clock is a good compromise for my panels.
+  * `test_pattern`: if true, enters a LED panel test mode instead of normal operation
+  * `tp_brightness`: brightness of the test pattern, from 1 to 127. Current draw gets ridiculous for the higher values
+  * `is_clk_inverted`: if `false`, data changes on the rising clock edge. If `true`, data is stable on the rising clock edge (most panels need `true`)
+  * `column_swap`: if true, swap each pair of vertical columns
+  * when `latch_offset` = 0: latch row-data with last pixel. For positive / negative numbers the latching happens n clock cycles earlier / later. Shifts the image horizontally
+  * `extra_blank` adds N additional delay cycles after latching before enabling the LEDs to prevent ghosting artifacts from one row to another
+  * `clkm_div_num` sets the I2S clock divider from 1 to 128. Set it too high and get flicker,  too low get ghost pixels. `4` (= 8 MHz pixel clock) is a good compromise for my panels
 
 __the `power` section__
 controls the display brightness depending on current time.
