@@ -3,7 +3,7 @@
 //--------------------------------------------------------
 
 #include <errno.h>
-#include <dirent.h> 
+#include <dirent.h>
 #include <sys/stat.h>
 // #include <sys/statvfs.h>
 #include "libesphttpd/esp.h"
@@ -44,7 +44,7 @@ CgiStatus ICACHE_FLASH_ATTR cgiEspFilesListHook(HttpdConnData *connData) {
 		return HTTPD_CGI_DONE;
 	}
 	jRoot = cJSON_CreateObject();
-	if (strcmp(prefix,"/S") == 0){
+	if (strcmp(prefix,"/s") == 0){
 		esp_spiffs_info(NULL, &partTotal, &partUsed);
 		cJSON_AddNumberToObject( jRoot, "spiffsTotal", partTotal );
 		cJSON_AddNumberToObject( jRoot, "spiffsUsed",  partUsed );
@@ -84,7 +84,7 @@ CgiStatus ICACHE_FLASH_ATTR cgiEspFilesListHook(HttpdConnData *connData) {
 //This is a catch-all cgi function. It takes the url passed to it, looks up the corresponding
 //path in the vfs filesystem and if it exists, passes the file through. This simulates what a normal
 //webserver would do with static files.
-// Exa,ple file transfer to SD card:  curl -X POST http://Espirgbani/SD/test.html --data-binary "@html/debug/index.html"
+// Exa,ple file transfer to SD card:  curl -X POST http://Espirgbani/sd/test.html --data-binary "@html/debug/index.html"
 CgiStatus ICACHE_FLASH_ATTR cgiEspVfsHook(HttpdConnData *connData) {
 	FILE *file=connData->cgiData;
 	HttpdPostData *p;
@@ -166,7 +166,7 @@ CgiStatus ICACHE_FLASH_ATTR cgiEspVfsHook(HttpdConnData *connData) {
 		} else {
 			//Ok, till next time.
 			return HTTPD_CGI_MORE;
-		}	
+		}
 	}
 }
 
@@ -199,7 +199,7 @@ CgiStatus ICACHE_FLASH_ATTR cgiEspRTC_LOG(HttpdConnData *connData) {
 		httpdStartResponse(connData, 200);
 		httpdHeader(connData, "content-type", "text/plain");
 		httpdEndHeaders(connData);
-	} 
+	}
 	nSend = MIN( state->nBytesLeft, 1024 );
 	httpdSend( connData, state->rPtr, nSend );
 	// printf("state %d, sending:", state->state);
@@ -214,7 +214,7 @@ CgiStatus ICACHE_FLASH_ATTR cgiEspRTC_LOG(HttpdConnData *connData) {
 		case 0:
 		//-----------------------------------------
 		// Second call, send beginning to newest
-		//-----------------------------------------		
+		//-----------------------------------------
 		// rtcLogWritePtr is on the oldest entry. Send [:newest]
 			state->rPtr = rtcLogBuffer;
 			state->nBytesLeft = rtcLogWritePtr-rtcLogBuffer;

@@ -1,18 +1,29 @@
 #ifndef JSON_SETTINGS_H
 #define JSON_SETTINGS_H
 
-#define jGet(a, b) (cJSON_GetObjectItemCaseSensitive(a, b))
-#define jGetI(a,b) (jGet(a,b) ? jGet(a,b)->valueint : 0)
-#define jGetD(a,b) (jGet(a,b) ? jGet(a,b)->valuedouble : 0)
-#define jGetS(a,b) (jGet(a,b) ? jGet(a,b)->valuestring : 0)
+#include "cJSON.h"
 
-// Returns a fallback string on json error
-const char *jGetSD( const cJSON *j, const char *sName, const char *sDefault );
+#define SETTINGS_FILE	"/sd/settings.json"
 
-// Returns the `settings.json` singleton object
+// loads the SETTINGS_FILE (if not loaded yet) and returns the cJSON object
 cJSON *getSettings();
 
-// Reloads the settings singleton
+// Reloads the SETTINGS_FILE
 void reloadSettings();
+
+// Get item "string" from .json object. Returns NULL on error
+#define jGet cJSON_GetObjectItemCaseSensitive
+
+// return string from .json or default-value on error
+const char *jGetS(const cJSON *json, const char *name, const char *default_val);
+
+// return integer from .json or default-value on error
+int jGetI(cJSON *json, const char *name, int default_val);
+
+// return double from .json or default-value on error
+int jGetD(cJSON *json, const char *name, double default_val);
+
+// return bool from .json or default-value on error
+int jGetB(cJSON *json, const char *name, bool default_val);
 
 #endif

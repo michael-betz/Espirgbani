@@ -24,7 +24,7 @@ typedef struct {
 } __attribute__ ((__packed__)) bitmapInfoHeader_t;
 
 
-FILE *loadBitmapFile( char *filename, bitmapFileHeader_t *bitmapFileHeader, bitmapInfoHeader_t *bitmapInfoHeader );
-void copyBmpToFbRect( FILE *bmpF, bitmapInfoHeader_t *bmInfo, uint16_t xBmp, uint16_t yBmp, uint16_t w, uint16_t h, int xFb, int yFb, uint8_t layerFb, uint32_t color, uint8_t chOffset );
+FILE *loadBitmapFile(char *file_name, bitmapFileHeader_t *bitmapFileHeader, bitmapInfoHeader_t *bitmapInfoHeader);
+void copyBmpToFbRect(FILE *bmpF, bitmapInfoHeader_t *bmInfo, uint16_t xBmp, uint16_t yBmp, uint16_t w, uint16_t h, int xFb, int yFb, uint8_t layerFb, uint32_t color, uint8_t chOffset);
 
 #endif

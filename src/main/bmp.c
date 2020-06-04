@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 #include "esp_log.h"
 #include "frame_buffer.h"
 #include "bmp.h"
@@ -9,43 +10,44 @@
 static const char *T = "BMP";
 
 // Returns a filepointer seeked to the beginngin of the bitmap data
-FILE *loadBitmapFile( char *filename, bitmapFileHeader_t *bitmapFileHeader, bitmapInfoHeader_t *bitmapInfoHeader ) {
-    FILE *filePtr; //our file pointer
-    //open filename in read binary mode
-    filePtr = fopen(filename,"rb");
-    if (filePtr == NULL)
+FILE *loadBitmapFile(char *file_name, bitmapFileHeader_t *bitmapFileHeader, bitmapInfoHeader_t *bitmapInfoHeader) {
+    FILE *filePtr;
+    filePtr = fopen(file_name, "rb");
+    if (!filePtr) {
+        ESP_LOGE(T, " fopen(%s, rb) failed: %s", file_name, strerror(errno));
         return NULL;
+    }
     //read the bitmap file header
-    fread( bitmapFileHeader, sizeof(bitmapFileHeader_t),1,filePtr);
+    fread(bitmapFileHeader, sizeof(bitmapFileHeader_t), 1, filePtr);
     //verify that this is a bmp file by check bitmap id
-    if (bitmapFileHeader->bfType !=0x4D42) {
+    if (bitmapFileHeader->bfType != 0x4D42) {
         fclose(filePtr);
         return NULL;
     }
     //read the bitmap info header
-    fread(bitmapInfoHeader, sizeof(bitmapInfoHeader_t),1,filePtr);
+    fread(bitmapInfoHeader, sizeof(bitmapInfoHeader_t), 1, filePtr);
     //move file point to the beggining of bitmap data
     fseek(filePtr, bitmapFileHeader->bfOffBits, SEEK_SET);
     return filePtr;
 }
 
 // copys a rectangular area from a font bitmap to the frambuffer layer
-void copyBmpToFbRect( FILE *bmpF, bitmapInfoHeader_t *bmInfo, uint16_t xBmp, uint16_t yBmp, uint16_t w, uint16_t h, int xFb, int yFb, uint8_t layerFb, uint32_t color, uint8_t chOffset ){
-    if ( bmpF==NULL || bmInfo==NULL )
+void copyBmpToFbRect(FILE *bmpF, bitmapInfoHeader_t *bmInfo, uint16_t xBmp, uint16_t yBmp, uint16_t w, uint16_t h, int xFb, int yFb, uint8_t layerFb, uint32_t color, uint8_t chOffset) {
+    if (bmpF == NULL || bmInfo == NULL)
         return;
-    if( chOffset >= bmInfo->biWidth/8 ){
+    if (chOffset >= bmInfo->biWidth / 8) {
         ESP_LOGE(T, "There's only %d color channels dude!", bmInfo->biWidth/8 );
         chOffset = bmInfo->biWidth/8 - 1;
     }
     int rowSize = ( (bmInfo->biBitCount * bmInfo->biWidth + 31)/32 * 4 );       //how many bytes per row
     uint8_t *rowBuffer = malloc( rowSize );                                     //allocate buffer for one input row
-    if( rowBuffer==NULL ){
+    if (rowBuffer == NULL) {
         ESP_LOGE(T, "Could not allocate rowbuffer");
         return;
     }
 	int startPos = ftell( bmpF );
 	//move vertically to the right row
-    fseek( bmpF, rowSize*(bmInfo->biHeight-yBmp-h), SEEK_CUR );
+    fseek(bmpF, rowSize*(bmInfo->biHeight-yBmp-h), SEEK_CUR);
     for ( int rowId=0; rowId<h; rowId++ ){
     	//read the whole row
     	if( fread( rowBuffer, 1, rowSize, bmpF ) != rowSize ){

@@ -46,14 +46,14 @@
 #define BIT_R2 (1<<3)
 #define BIT_G2 (1<<4)
 #define BIT_B2 (1<<5)
+#define BIT_A (1<<6)
+#define BIT_B (1<<7)
+#define BIT_C (1<<8)
+#define BIT_D (1<<9)
+#define BIT_LAT (1<<10)
+#define BIT_BLANK (1<<11)
 // -1 = don't care
 // -1
-#define BIT_A (1<<8)
-#define BIT_B (1<<9)
-#define BIT_C (1<<10)
-#define BIT_D (1<<11)
-#define BIT_LAT (1<<12)
-#define BIT_BLANK (1<<13)
 // -1
 // -1
 

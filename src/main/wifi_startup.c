@@ -45,10 +45,21 @@
 #include "frame_buffer.h"
 #include "wifi_startup.h"
 #include "font.h"
+#include "json_settings.h"
 
 static const char *T = "WIFI_STARTUP";
 EventGroupHandle_t wifi_event_group;
 wifiState_t wifiState=WIFI_CON_TO_AP_MODE;
+
+void setLogLevel(char c) {
+    switch (c) {
+        case 'E':   esp_log_level_set("*", ESP_LOG_ERROR);   break;
+        case 'W':   esp_log_level_set("*", ESP_LOG_WARN);    break;
+        case 'I':   esp_log_level_set("*", ESP_LOG_INFO);    break;
+        case 'D':   esp_log_level_set("*", ESP_LOG_DEBUG);   break;
+        case 'V':   esp_log_level_set("*", ESP_LOG_VERBOSE); break;
+    }
+}
 
 void wsReceive(Websock *ws, char *data, int len, int flags){
     uint16_t b = 0;
@@ -58,13 +69,7 @@ void wsReceive(Websock *ws, char *data, int len, int flags){
         case WS_ID_LOGLEVEL:
             // Set log level
             if( len != 2 )  return;
-            switch( data[1] ){
-                case 'E':   esp_log_level_set("*", ESP_LOG_ERROR);   break;
-                case 'W':   esp_log_level_set("*", ESP_LOG_WARN);    break;
-                case 'I':   esp_log_level_set("*", ESP_LOG_INFO);    break;
-                case 'D':   esp_log_level_set("*", ESP_LOG_DEBUG);   break;
-                case 'V':   esp_log_level_set("*", ESP_LOG_VERBOSE); break;
-            }
+            setLogLevel(data[1]);
             break;
 
         case WS_ID_FONT:
@@ -109,10 +114,10 @@ const HttpdBuiltInUrl builtInUrls[]={
     {"/reboot",        cgiRebootFirmware,       NULL },
     {"/reload",        cgiReloadSettings,       NULL },
     {"/log.txt",       cgiEspRTC_LOG,           NULL },
-    {"/S",             cgiEspFilesListHook,    "/S" },
-    {"/SD",            cgiEspFilesListHook,    "/SD"},
-    {"/S/*",           cgiEspVfsHook,           NULL }, //Catch-all cgi function for the SPIFFS filesystem
-    {"/SD/*",          cgiEspVfsHook,           NULL }, //Catch-all cgi function for the SD card filesystem
+    {"/s",             cgiEspFilesListHook,    "/s" },
+    {"/sd",            cgiEspFilesListHook,    "/sd"},
+    {"/s/*",           cgiEspVfsHook,           NULL }, //Catch-all cgi function for the SPIFFS filesystem
+    {"/sd/*",          cgiEspVfsHook,           NULL }, //Catch-all cgi function for the SD card filesystem
     {"*",              cgiEspFsHook,            NULL }, //Catch-all cgi function for the static filesystem
     {NULL, NULL, NULL}
 };
@@ -181,20 +186,20 @@ int getKnownApPw( wifi_ap_record_t *foundAps, uint16_t foundNaps, uint8_t *ssid,
         ESP_LOGI(T, "ch: %2d, ssid: %16s, bssid: %02x:%02x:%02x:%02x:%02x:%02x, rssi: %d", currAp->primary, (char*)currAp->ssid, currAp->bssid[0], currAp->bssid[1], currAp->bssid[2], currAp->bssid[3], currAp->bssid[4], currAp->bssid[5], currAp->rssi );
         currAp++;
     }
-    jWifis = cJSON_GetObjectItemCaseSensitive( getSettings(), "wifis");
-    // Go through all found APs, use ssid as key and try to get item from json
-    for( i=0,currAp=foundAps; i<foundNaps; i++ ){
-        jWifi = cJSON_GetObjectItemCaseSensitive( jWifis, (char*)currAp->ssid);
+    jWifis = cJSON_GetObjectItemCaseSensitive(getSettings(), "wifis");
+    // Go through all received APs and try to look them up in .json
+    for(i=0, currAp=foundAps; i<foundNaps; i++) {
+        // use the received SSID as key in the .json `wifis` dict
+        jWifi = cJSON_GetObjectItemCaseSensitive(jWifis, (char*)currAp->ssid);
         currAp++;
-        if ( !cJSON_IsObject(jWifi) ){
+        if (!cJSON_IsObject(jWifi))
             continue;
-        }
         //---------------------------------------------------
         // Found a known good WIFI, connect to it ...
         //---------------------------------------------------
-        ESP_LOGW(T,"match: %s, trying to connect ...", jWifi->string );
-        strcpy( (char*)ssid, jWifi->string );
-        strcpy( (char*)pw, jGetSD(jWifi,"pw","") );
+        ESP_LOGW(T, "match: %s, trying to connect ...", jWifi->string);
+        strcpy((char*)ssid, jWifi->string);
+        strcpy((char*)pw, jGetS(jWifi, "pw", ""));
         return 0;
     }
     return -1;

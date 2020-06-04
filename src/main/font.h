@@ -61,24 +61,24 @@ typedef struct{
   int kernsLen;         // [bytes]
 } font_t;
 
-font_t *loadFntFile( char *fileName );
-void printFntFile( font_t *fDat );
-fontChar_t *getCharInfo( font_t *fDat, char c );
-void freeFntFile( font_t *fDat );
-void initFont( const char *filePrefix );
-void drawChar( char c, uint8_t layer, uint32_t color, uint8_t chOffset );
-void setCur( int x, int y );
+font_t *loadFntFile(char *file_name);
+void printFntFile(font_t *fDat);
+fontChar_t *getCharInfo(font_t *fDat, char c);
+void freeFntFile(font_t *fDat );
+bool initFont(const char *filePrefix);
+void drawChar(char c, uint8_t layer, uint32_t color, uint8_t chOffset);
+void setCur(int x, int y);
 
 // draws a zero terminated string into `layer` at x,y with colors cOutline and cFill
-void drawStr( const char *str, int x, int y, uint8_t layer, uint32_t cOutline, uint32_t cFill );
+void drawStr(const char *str, int x, int y, uint8_t layer, uint32_t cOutline, uint32_t cFill);
 
 // returns expected width of the string rectangle
-int getStrWidth( const char *str );
+int getStrWidth(const char *str);
 
 // draws a zero terminated string into `layer` centered on the screen with colors cOutline and cFill
-void drawStrCentered( const char *str, uint8_t layer, uint32_t cOutline, uint32_t cFill );
+void drawStrCentered(const char *str, uint8_t layer, uint32_t cOutline, uint32_t cFill);
 
 // Returns the number of consecutive `path/0.fnt` files
-int cntFntFiles( const char* path );
+int cntFntFiles(const char* path);
 
 #endif

@@ -22,7 +22,7 @@ void initSd(){
         .max_files = 5	//Max number of open files
     };
     sdmmc_card_t* card;
-    esp_err_t ret = esp_vfs_fat_sdmmc_mount("/SD", &host, &slot_config, &mount_config, &card);
+    esp_err_t ret = esp_vfs_fat_sdmmc_mount("/sd", &host, &slot_config, &mount_config, &card);
 
     if (ret != ESP_OK) {
         if (ret == ESP_FAIL) {

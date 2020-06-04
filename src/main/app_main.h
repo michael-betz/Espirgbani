@@ -1,11 +1,12 @@
 #ifndef APP_MAIN_H
 #define APP_MAIN_H
 
+#define ANIMATION_FILE "/sd/runDmd.img"
+
 #define WS_ID_WEBCONSOLE 'a'
 #define WS_ID_LOGLEVEL   'l'
 #define WS_ID_FONT       'f'
 #define WS_ID_MAXFONT    'g'
-
 
 #define MIN(a,b) (a<b?a:b)
 #define MAX(a,b) (a>b?a:b)

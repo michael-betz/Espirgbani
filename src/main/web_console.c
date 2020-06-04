@@ -36,7 +36,7 @@ RTC_DATA_ATTR char *rtcLogWritePtr = rtcLogBuffer;
 //     }
 //     fflush( f );
 //     // ESP_LOGI(T,"Wrote %d bytes", ret);
-    
+
 //     // Get size of /a.txt
 //     if ( stat("/S/a.txt", &st) == 0 ) {
 //         // Check if a.txt is over the size limit
@@ -92,10 +92,10 @@ void initSpiffs(){
     int temp=0;
     ESP_LOGI(T, "Initializing SPIFFS");
     esp_vfs_spiffs_conf_t conf = {
-      .base_path = "/S",
+      .base_path = "/spiffs",
       .partition_label = NULL,
       .max_files = 5,
-      .format_if_mount_failed = true
+      .format_if_mount_failed = false
     };
     // Use settings defined above to initialize and mount SPIFFS filesystem.
     // Note: esp_vfs_spiffs_register is an all-in-one convenience function.

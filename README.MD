@@ -72,19 +72,19 @@ Format as FAT32, then copy the following files:
 ```json
 {
     "panel": {
-        "test_pattern": 0,
-        "tp_brightness":  8,
-        "is_clk_inverted": 1,
-        "column_swap": 0,
+        "test_pattern": false,
+        "tp_brightness":  10,
+        "is_clk_inverted": true,
+        "column_swap": false,
         "latch_offset": 0,
         "extra_blank": 1,
-        "clkm_div_num": 8
+        "clkm_div_num": 4
     },
     "power": {
         "hi": {
             "h": 9,
             "m": 0,
-            "p": 90,
+            "p": 50,
             "pingIp": "192.168.1.208"
         },
         "lo": {
@@ -99,6 +99,7 @@ Format as FAT32, then copy the following files:
         "ani":   15,
         "ping":  60
     },
+    "log_level": "W",
     "timezone": "PST8PDT,M3.2.0,M11.1.0",
     "hostname": "espirgbani",
     "wifis": {
@@ -109,21 +110,26 @@ Format as FAT32, then copy the following files:
 }
 ```
 __the `panel` section__
-Not all LED panels are the same. Here the I2C panel driver can be configured.
-  * when `test_pattern` is > 0, enters a LED panel test mode instead of normal operation
-  * `tp_brightness` is the brightness of the test pattern, from 1 to 127. Current draw gets ridiculous for the higher values.
-  * `is_clk_inverted` = 0: data changes on clock rising edge, `is_clk_inverted` = 1: data is stable on clock rising edge (most likely the correct setting)
+Not all LED panels are the same. Here the timing parameters of the I2S panel driver can be configured.
+
+  * `test_pattern` is > 0: enters a LED panel test mode instead of normal operation
+  * `tp_brightness`: brightness of the test pattern, from 1 to 127. Current draw gets ridiculous for the higher values.
+  * `is_clk_inverted` = 0: data changes on clock rising edge, `is_clk_inverted` = 1: data is stable on clock rising edge (most panels need the latter)
   * when `column_swap` > 0: swap pairs of columns
-  * when `latch_offset` = 0: latch pulse happens with last pixel. For positive / negative numbers the latch pulse happens n clock cycles earlier / later. Shifts the image horizontally.
+  * when `latch_offset` = 0: latch row-data with last pixel. For positive / negative numbers the latching happens n clock cycles earlier / later. Shifts the image horizontally.
   * `extra_blank` adds N additional delay cycles after latching before enabling the LEDs to prevent ghosting artifacts from one row to another.
-  * `clkm_div_num` sets the I2S clock divider from 1 to 128. Set it too high and get flicker,  too low get ghost pixels. 8 works well for me.
+  * `clkm_div_num` sets the I2S clock divider from 1 to 128. Set it too high and get flicker,  too low get ghost pixels. 4 = 8 MHz pixel clock is a good compromise for my panels.
 
 __the `power` section__
+controls the display brightness depending on current time.
+
   * Switches to brightness `90` at `9:00`
   * But only if `192.168.1.208` responds to pings
   * Switches to brightness `1` at `22:45`
 
 __the `delays` section__
+controls delays between random animations, color and font changes.
+
   * Changes the clock font every 60 minutes
   * Changes color of the clock font every 10 minutes
   * Plays a new pinball animation every 15 seconds
@@ -131,7 +137,7 @@ __the `delays` section__
 
 __timezone__ is the local timezone in [TZ format](https://www.gnu.org/software/libc/manual/html_node/TZ-Variable.html). Look it up [here](https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv).
 
-Note that, once running, the settings.json file can be edited through the web interface.
+Note that once running and connected to the wifi, the settings.json file can be edited through the web interface.
 
 ## how to get `runDmd.img`
   * Find a run-dmd image file and write it to SD card according to their instructions (HDD Raw Copy Tool and Windows required)
