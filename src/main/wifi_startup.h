@@ -35,7 +35,7 @@ extern wifiState_t wifiState;
 extern void wifi_conn_init(void);
 extern void wifi_disable();
 
-#define jGet( a,b)  cJSON_GetObjectItemCaseSensitive(a,b)
+#define jGet(a, b) (cJSON_GetObjectItemCaseSensitive(a, b))
 #define jGetI(a,b) (jGet(a,b) ? jGet(a,b)->valueint : 0)
 #define jGetD(a,b) (jGet(a,b) ? jGet(a,b)->valuedouble : 0)
 #define jGetS(a,b) (jGet(a,b) ? jGet(a,b)->valuestring : 0)

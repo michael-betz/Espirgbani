@@ -9,10 +9,6 @@
 //is more sane, uncomment this to get a good image.
 // #define DISPLAY_ROWS_SWAPPED 1
 
-// reduces flicker on my panels, seems to break other panels
-// as a side-effect, does the same as #define DISPLAY_ROWS_SWAPPED 1
-#define FLICKER_HACK 1
-
 //This is the bit depth, per RGB subpixel, of the data that is sent to the display.
 //The effective bit depth (in computer pixel terms) is less because of the PWM correction. With
 //a bitplane count of 7, you should be able to reproduce an 16-bit image more or less faithfully, though.
@@ -36,7 +32,7 @@
 #define GPIO_C      19
 #define GPIO_D      23
 #define GPIO_LAT    26
-#define GPIO_OE     25
+#define GPIO_BLANK  25
 #define GPIO_CLK    22
 
 // -------------------------------------------
@@ -57,7 +53,7 @@
 #define BIT_C (1<<10)
 #define BIT_D (1<<11)
 #define BIT_LAT (1<<12)
-#define BIT_OE (1<<13)
+#define BIT_BLANK (1<<13)
 // -1
 // -1
 

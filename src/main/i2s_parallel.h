@@ -18,7 +18,8 @@ typedef struct {
 typedef struct {
     int gpio_bus[24];
     int gpio_clk;
-    int clkspeed_hz;
+    int clk_div;
+    bool is_clk_inverted;
     i2s_parallel_cfg_bits_t bits;
     i2s_parallel_buffer_desc_t *bufa;
     i2s_parallel_buffer_desc_t *bufb;

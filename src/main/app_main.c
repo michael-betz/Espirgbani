@@ -153,25 +153,53 @@ static void IRAM_ATTR gpio_isr_handler(void* arg){
     wifiState = WIFI_START_HOTSPOT_MODE;
 }
 
+void tp_stripes(unsigned width, unsigned offset, bool isY)
+{
+    for (unsigned y=0; y<DISPLAY_HEIGHT; y++) {
+        for (unsigned x=0; x<DISPLAY_WIDTH; x++) {
+            unsigned var = isY ? x : y;
+            unsigned col = (var + offset) % width == 0 ? 0xFFFFFFFF : 0xFF000000;
+            setPixel(2, x, y, col);
+        }
+    }
+    updateFrame();
+}
+
+void tp_stripes_sequence(bool isY)
+{
+    for (unsigned i=0; i<8; i++) {
+        ESP_LOGW(T, "stripes %d / 8", i + 1);
+        tp_stripes(8, i, isY);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+    for (unsigned i=0; i<4; i++) {
+        ESP_LOGW(T, "stripes %d / 2", (i % 2) + 1);
+        tp_stripes(2, i % 2, isY);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+}
+
 void app_main(){
     //------------------------------
     // Enable RAM log file
     //------------------------------
-    esp_log_level_set("*", ESP_LOG_INFO);
+    esp_log_level_set("*", ESP_LOG_WARN);
     esp_log_set_vprintf(wsDebugPrintf);
     srand(esp_random());
-
-    //------------------------------
-    // Init rgb tiles
-    //------------------------------
-    init_rgb();
-    g_rgbLedBrightness = 10;
 
     //------------------------------
     // Init filesystems
     //------------------------------
     initSpiffs();
     initSd();
+    getSettings();
+
+    //------------------------------
+    // Init rgb tiles
+    //------------------------------
+    // with .json settings, display HelloWrld
+    g_rgbLedBrightness = 10;
+    init_rgb();
     initFont("/SD/fnt/2");
     setAll(2, 0x00000000);
     drawStrCentered("HelloWrld", 1, 0xFF222222, 0xFF000000);
@@ -200,6 +228,52 @@ void app_main(){
     //------------------------------
     ESP_LOGI(T,"Starting network infrastructure ...");
     wifi_conn_init();
+
+    //------------------------------
+    // display test-pattern
+    //------------------------------
+    // only if enabled in json
+    cJSON *jPanel = jGet(getSettings(), "panel");
+    if (jPanel && jGetI(jPanel, "test_pattern")) {
+        g_rgbLedBrightness = jGetI(jPanel, "tp_brightness");
+        if (g_rgbLedBrightness < 1) g_rgbLedBrightness = 10;
+        while(1) {
+            ESP_LOGW(T, "Test-pattern mode!!!");
+            setAll(0, 0xFF000000);
+            setAll(1, 0xFF000000);
+            setAll(2, 0xFF000000);
+            updateFrame();
+
+            ESP_LOGW(T, "Diagonal");
+            for (unsigned y=0; y<DISPLAY_HEIGHT; y++)
+                for (unsigned x=0; x<DISPLAY_WIDTH; x++)
+                    setPixel(2, x, y, (x - y) % DISPLAY_HEIGHT == 0 ? 0xFFFFFFFF : 0xFF000000);
+            updateFrame();
+            vTaskDelay(5000 / portTICK_PERIOD_MS);
+
+            ESP_LOGW(T, "Vertical stripes ...");
+            tp_stripes_sequence(true);
+
+            ESP_LOGW(T, "Horizontal stripes ...");
+            tp_stripes_sequence(false);
+
+            ESP_LOGW(T, "All red");
+            setAll(2, 0xFF0000FF);
+            updateFrame();
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+            ESP_LOGW(T, "All green");
+            setAll(2, 0xFF00FF00);
+            updateFrame();
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+            ESP_LOGW(T, "All blue");
+            setAll(2, 0xFFFF0000);
+            updateFrame();
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+        }
+    }
+
     xEventGroupWaitBits(wifi_event_group, CONNECTED_BIT, 0, 0, 20000/portTICK_PERIOD_MS);
     updateFrame();
     vTaskDelay(3000 / portTICK_PERIOD_MS);
@@ -220,6 +294,7 @@ void app_main(){
     strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
     ESP_LOGI(T, "Local Time: %s (%ld)", strftime_buf, time(NULL));
     srand(time(NULL));
+
 
     //------------------------------
     // Startup animated background layer
@@ -242,9 +317,11 @@ void app_main(){
     headerEntry_t myHeader;
 
     int aniId;
+
     cJSON *jDelay = jGet( getSettings(), "delays");
     while(1){
         vTaskDelay( jGetI(jDelay,"ani")*1000 / portTICK_PERIOD_MS);
+
         aniId = RAND_AB( 0, fh.nAnimations-1 );
         readHeaderEntry( f, &myHeader, aniId );
         ESP_LOGD(T, "%s", myHeader.name);

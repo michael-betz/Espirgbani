@@ -71,6 +71,15 @@ Format as FAT32, then copy the following files:
 ## example `settings.json`
 ```json
 {
+    "panel": {
+        "test_pattern": 0,
+        "tp_brightness":  8,
+        "is_clk_inverted": 1,
+        "column_swap": 0,
+        "latch_offset": 0,
+        "extra_blank": 1,
+        "clkm_div_num": 8
+    },
     "power": {
         "hi": {
             "h": 9,
@@ -99,12 +108,22 @@ Format as FAT32, then copy the following files:
     }
 }
 ```
-__Some notes about the `power` section__
+__the `panel` section__
+Not all LED panels are the same. Here the I2C panel driver can be configured.
+  * when `test_pattern` is > 0, enters a LED panel test mode instead of normal operation
+  * `tp_brightness` is the brightness of the test pattern, from 1 to 127. Current draw gets ridiculous for the higher values.
+  * `is_clk_inverted` = 0: data changes on clock rising edge, `is_clk_inverted` = 1: data is stable on clock rising edge (most likely the correct setting)
+  * when `column_swap` > 0: swap pairs of columns
+  * when `latch_offset` = 0: latch pulse happens with last pixel. For positive / negative numbers the latch pulse happens n clock cycles earlier / later. Shifts the image horizontally.
+  * `extra_blank` adds N additional delay cycles after latching before enabling the LEDs to prevent ghosting artifacts from one row to another.
+  * `clkm_div_num` sets the I2S clock divider from 1 to 128. Set it too high and get flicker,  too low get ghost pixels. 8 works well for me.
+
+__the `power` section__
   * Switches to brightness `90` at `9:00`
   * But only if `192.168.1.208` responds to pings
   * Switches to brightness `1` at `22:45`
 
-__Some notes about the `delays` section__
+__the `delays` section__
   * Changes the clock font every 60 minutes
   * Changes color of the clock font every 10 minutes
   * Plays a new pinball animation every 15 seconds
@@ -135,3 +154,6 @@ Note that, once running, the settings.json file can be edited through the web in
 
 ## Pre-built binaries (TLDR!)
 Prebuilt firmware binaries for the ESP32 and the files for the (FAT32) SD card are [here](https://github.com/yetifrisstlama/Espirgbani/releases/tag/v1.0).
+
+# TODO
+  * rewrite .json settings

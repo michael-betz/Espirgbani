@@ -1,4 +1,6 @@
 #include <string.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include "esp_log.h"
 #include "web_console.h"
@@ -7,6 +9,7 @@
 #include "frame_buffer.h"
 #include "rgb_led_panel.h"
 #include "assert.h"
+#include "wifi_startup.h"
 
 
 static const char *T = "RGB_LED_PANEL";
@@ -18,17 +21,50 @@ int backbuf_id = 0;
 uint16_t *bitplane[2][BITPLANE_CNT];
 //DISPLAY_WIDTH * 32 * 3 array with image data, 8R8G8B
 
+// .json configurable parameters
+static cJSON *jPanel = NULL;
+static int latch_offset = 0;
+static unsigned extra_blank = 0;
+static bool isColumnSwapped = false;
+
 void init_rgb(){
     initFb();
     i2s_parallel_buffer_desc_t bufdesc[2][1<<BITPLANE_CNT];
-    i2s_parallel_config_t cfg={
-        .gpio_bus={GPIO_R1, GPIO_G1, GPIO_B1,   GPIO_R2, GPIO_G2, GPIO_B2,   -1, -1,   GPIO_A, GPIO_B, GPIO_C, GPIO_D,   GPIO_LAT, GPIO_OE,   -1, -1},
+    i2s_parallel_config_t cfg = {
+        .gpio_bus={GPIO_R1, GPIO_G1, GPIO_B1,   GPIO_R2, GPIO_G2, GPIO_B2,   -1, -1,   GPIO_A, GPIO_B, GPIO_C, GPIO_D,   GPIO_LAT, GPIO_BLANK,   -1, -1},
         .gpio_clk=GPIO_CLK,
         .bits=I2S_PARALLEL_BITS_16,
-        .clkspeed_hz=20*1000*1000,  // seems to be not used
         .bufa=bufdesc[0],
         .bufb=bufdesc[1],
     };
+
+    // get `panel` dictionary of json file
+    jPanel = jGet(getSettings(), "panel");
+    if (jPanel) {
+        // Swap pixel x[0] with x[1]
+        isColumnSwapped = jGetI(jPanel, "column_swap") > 0;
+        if (isColumnSwapped)
+            ESP_LOGW(T, "column_swap applied!");
+
+        // adjust clock cycle of the latch pulse (nominally = 0 = last pixel)
+        latch_offset = ((DISPLAY_WIDTH - 1) + jGetI(jPanel, "latch_offset")) % DISPLAY_WIDTH;
+        ESP_LOGW(T, "latch_offset = %d", latch_offset);
+
+        // adjust extra blanking cycles to reduce ghosting effects
+        extra_blank = jGetI(jPanel, "extra_blank");
+
+        // set clock divider
+        cfg.clk_div = jGetI(jPanel, "clkm_div_num");
+        if (cfg.clk_div < 1) cfg.clk_div = 1;
+        ESP_LOGW(T, "clkm_div_num = %d", cfg.clk_div);
+
+        cfg.is_clk_inverted = jGetI(jPanel, "is_clk_inverted") > 0;
+    } else {
+        ESP_LOGE(T,".json: could not read `panel` section");
+        cfg.clk_div = 16;     // = 2.4 MHz
+        cfg.is_clk_inverted = true;
+        latch_offset = DISPLAY_WIDTH - 1;
+    }
 
     for (int i=0; i<BITPLANE_CNT; i++) {
         for (int j=0; j<2; j++) {
@@ -64,14 +100,6 @@ void init_rgb(){
     //Setup I2S
     i2s_parallel_setup(&I2S1, &cfg);
 
-    // reduces flicker on my panels, seems to break other panels
-    // as a side-effect, does the same as #define DISPLAY_ROWS_SWAPPED 1
-#if FLICKER_HACK
-    I2S1.conf2.lcd_tx_wrx2_en = 1;
-    I2S1.fifo_conf.tx_fifo_mod = 0;
-    I2S1.conf_chan.tx_chan_mod = 0;
-#endif
-
     ESP_LOGI(T,"I2S setup done.");
 }
 
@@ -89,16 +117,17 @@ void updateFrame(){
             if ((y-1)&4) lbits|=BIT_C;
             if ((y-1)&8) lbits|=BIT_D;
             for (int fx=0; fx<DISPLAY_WIDTH; fx++) {
-#if DISPLAY_ROWS_SWAPPED
-                int x=fx^1; //to correct for the fact that the stupid LED screen I have has each row swapped...
-#else
-                int x=fx;
-#endif
+                int x = fx;
+
+                if (isColumnSwapped)
+                    x ^= 1;
+
                 int v=lbits;
                 // Do not show image while the line bits are changing
-                if (fx<1 || fx>=g_rgbLedBrightness + 8) v|=BIT_OE;
-                // latch on last bit... note that spritetm needs to latch on DISPLAY_WIDTH - 2
-                if (fx==(DISPLAY_WIDTH-1)) v|=BIT_LAT;
+                if (fx < extra_blank || fx >= g_rgbLedBrightness + 8) v |= BIT_BLANK;
+
+                // latch on last bit...
+                if (fx == latch_offset) v |= BIT_LAT;
 
                 int c1 = getBlendedPixel(x, y);
                 int c2 = getBlendedPixel(x, y+16);
