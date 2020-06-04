@@ -109,7 +109,7 @@ Format as FAT32, then copy the following files:
     }
 }
 ```
-__the `panel` section__
+### `panel` section
 Not all LED panels are the same. Here the timing parameters of the I2S panel driver can be configured.
 
   * `test_pattern`: if true, enters a LED panel test mode instead of normal operation
@@ -120,14 +120,14 @@ Not all LED panels are the same. Here the timing parameters of the I2S panel dri
   * `extra_blank` adds N additional delay cycles after latching before enabling the LEDs to prevent ghosting artifacts from one row to another
   * `clkm_div_num` sets the I2S clock divider from 1 to 128. Set it too high and get flicker,  too low get ghost pixels. `4` (= 8 MHz pixel clock) is a good compromise for my panels
 
-__the `power` section__
+### `power` section
 controls the display brightness depending on current time.
 
   * Switches to brightness `90` at `9:00`
   * But only if `192.168.1.208` responds to pings
   * Switches to brightness `1` at `22:45`
 
-__the `delays` section__
+### `delays` section
 controls delays between random animations, color and font changes.
 
   * Changes the clock font every 60 minutes
@@ -135,9 +135,11 @@ controls delays between random animations, color and font changes.
   * Plays a new pinball animation every 15 seconds
   * tries to ping `pingIp` every 60 seconds
 
-__log_level__ is the logging level for the serial port and the web-console on startup. Can be one of the following letters: `E = ERROR`, `W = WARN`, `I = INFO`, `D = DEBUG`, `V = VERBOSE`
+### `log_level`
+is the logging level for the serial port and the web-console on startup. Can be one of the following letters: `E = ERROR`, `W = WARN`, `I = INFO`, `D = DEBUG`, `V = VERBOSE`
 
-__timezone__ is the local timezone in [TZ format](https://www.gnu.org/software/libc/manual/html_node/TZ-Variable.html). Look it up [here](https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv).
+### `timezone`
+is the local timezone in [TZ format](https://www.gnu.org/software/libc/manual/html_node/TZ-Variable.html). Look it up [here](https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv).
 
 Note that once running and connected to the wifi, the settings.json file can be edited through the web interface.
 
