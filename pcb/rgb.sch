@@ -1,22 +1,17 @@
-EESchema Schematic File Version 5
+EESchema Schematic File Version 4
 EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
-Title "ESPIRGBANI"
+Title "ESP Pinball RGB Animation clock (espirgbani)"
 Date "2018-02-24"
 Rev "1"
-Comp "Compu Global Hyper Meganet"
+Comp ""
 Comment1 ""
 Comment2 ""
 Comment3 ""
-Comment4 "Pinball RGB clock"
-Comment5 ""
-Comment6 ""
-Comment7 ""
-Comment8 ""
-Comment9 ""
+Comment4 ""
 $EndDescr
 Connection ~ 1650 4400
 Connection ~ 1650 4850
@@ -64,6 +59,14 @@ Wire Wire Line
 Wire Wire Line
 	1650 4400 1650 4450
 Wire Wire Line
+	1650 4750 1650 4850
+Wire Wire Line
+	1650 4850 1650 4950
+Wire Wire Line
+	1650 4950 1650 5050
+Wire Wire Line
+	1650 5050 1650 5150
+Wire Wire Line
 	1650 5150 1650 5200
 Wire Wire Line
 	1650 5150 1700 5150
@@ -76,43 +79,129 @@ Wire Wire Line
 Wire Wire Line
 	1700 5050 1650 5050
 Wire Wire Line
+	1850 2300 1650 2300
+Wire Wire Line
+	1850 2400 1650 2400
+Wire Wire Line
+	1850 2500 1650 2500
+Wire Wire Line
+	1850 2600 1650 2600
+Wire Wire Line
+	1850 2700 1650 2700
+Wire Wire Line
+	1850 2800 1650 2800
+Wire Wire Line
+	1850 2900 1650 2900
+Wire Wire Line
+	1850 3000 1650 3000
+Wire Wire Line
 	2150 6850 2200 6850
 Wire Wire Line
 	2150 7100 2200 7100
 Wire Wire Line
 	2200 6350 2200 6400
 Wire Wire Line
+	2200 6400 2200 6750
+Wire Wire Line
+	2200 6400 2550 6400
+Wire Wire Line
 	2200 6750 2150 6750
+Wire Wire Line
+	2200 6850 2200 7100
+Wire Wire Line
+	2200 7100 2200 7200
+Wire Wire Line
+	2350 2900 2600 2900
+Wire Wire Line
+	2550 6400 2550 6700
+Wire Wire Line
+	2550 6400 2700 6400
+Wire Wire Line
+	2550 7200 2550 7000
+Wire Wire Line
+	2600 2300 2350 2300
+Wire Wire Line
+	2600 2400 2350 2400
+Wire Wire Line
+	2600 2500 2350 2500
+Wire Wire Line
+	2600 2600 2350 2600
+Wire Wire Line
+	2600 2700 2350 2700
+Wire Wire Line
+	2600 2800 2350 2800
+Wire Wire Line
+	2600 3000 2350 3000
+Wire Wire Line
+	2850 3950 3150 3950
+Wire Wire Line
+	2850 4400 3150 4400
+Wire Wire Line
+	2850 4550 3150 4550
+Wire Wire Line
+	2850 4700 3150 4700
 Wire Wire Line
 	2900 4850 2850 4850
 Wire Wire Line
+	2900 4850 2900 4950
+Wire Wire Line
 	2900 4950 2850 4950
 Wire Wire Line
+	2900 4950 2900 5050
+Wire Wire Line
 	2900 5050 2850 5050
+Wire Wire Line
+	2900 5050 2900 5150
 Wire Wire Line
 	2900 5150 2850 5150
 Wire Wire Line
 	2900 5150 2900 5200
 Wire Wire Line
+	3100 6800 3100 6700
+Wire Wire Line
 	3500 6400 3550 6400
 Wire Wire Line
 	3500 6500 3550 6500
+Wire Wire Line
+	3550 3950 4000 3950
+Wire Wire Line
+	3550 4050 4000 4050
+Wire Wire Line
+	3550 4250 4000 4250
+Wire Wire Line
+	3550 4450 4000 4450
+Wire Wire Line
+	3550 6400 3950 6400
+Wire Wire Line
+	3550 6500 3550 6400
 Wire Wire Line
 	3950 4150 4000 4150
 Wire Wire Line
 	3950 4350 4000 4350
 Wire Wire Line
+	3950 6400 4500 6400
+Wire Wire Line
 	3950 6450 3950 6400
 Wire Wire Line
 	3950 6750 3950 6800
+Wire Wire Line
+	3950 6800 3100 6800
 Wire Wire Line
 	3950 6800 3950 6850
 Wire Wire Line
 	3950 7200 3950 7150
 Wire Wire Line
+	4100 2400 4100 2550
+Wire Wire Line
+	4100 2650 4100 2800
+Wire Wire Line
 	4100 2800 4100 2850
 Wire Wire Line
+	4100 2800 4400 2800
+Wire Wire Line
 	4100 3200 4100 3150
+Wire Wire Line
+	4400 2800 5850 2800
 Wire Wire Line
 	4400 2850 4400 2800
 Wire Wire Line
@@ -120,23 +209,77 @@ Wire Wire Line
 Wire Wire Line
 	4500 6350 4500 6400
 Wire Wire Line
+	4500 6400 4500 6650
+Wire Wire Line
+	4500 7200 4500 6950
+Wire Wire Line
+	5000 2050 5000 2500
+Wire Wire Line
+	5000 2500 5000 2700
+Wire Wire Line
+	5000 2700 5850 2700
+Wire Wire Line
 	5000 3200 5050 3200
 Wire Wire Line
 	5050 2500 5000 2500
 Wire Wire Line
 	5350 2500 5400 2500
 Wire Wire Line
+	5350 3200 5850 3200
+Wire Wire Line
 	5400 2450 5400 2500
 Wire Wire Line
+	5400 2500 5400 2600
+Wire Wire Line
 	5400 2500 5450 2500
+Wire Wire Line
+	5400 2600 5850 2600
+Wire Wire Line
+	5400 3400 5850 3400
+Wire Wire Line
+	5400 3500 5850 3500
+Wire Wire Line
+	5400 3600 5850 3600
+Wire Wire Line
+	5400 3800 5850 3800
 Wire Wire Line
 	5750 2500 5800 2500
 Wire Wire Line
 	5800 2500 5850 2500
 Wire Wire Line
+	5850 3300 5400 3300
+Wire Wire Line
+	5850 3700 5400 3700
+Wire Wire Line
 	6400 4200 6400 4150
 Wire Wire Line
+	6500 4150 6500 4400
+Wire Wire Line
+	7200 4150 7200 4400
+Wire Wire Line
+	7300 4150 7300 4400
+Wire Wire Line
 	7750 2500 7800 2500
+Wire Wire Line
+	7750 2600 7950 2600
+Wire Wire Line
+	7750 2700 7950 2700
+Wire Wire Line
+	7750 2800 9450 2800
+Wire Wire Line
+	7750 2900 9450 2900
+Wire Wire Line
+	7750 3200 7950 3200
+Wire Wire Line
+	7750 3300 7950 3300
+Wire Wire Line
+	7750 3400 7950 3400
+Wire Wire Line
+	7750 3500 7950 3500
+Wire Wire Line
+	7750 3600 7950 3600
+Wire Wire Line
+	7750 3800 9350 3800
 Wire Wire Line
 	7800 2400 7750 2400
 Wire Wire Line
@@ -146,9 +289,19 @@ Wire Wire Line
 Wire Wire Line
 	7800 2500 7800 2450
 Wire Wire Line
+	9350 2050 5000 2050
+Wire Wire Line
+	9350 2050 9350 2150
+Wire Wire Line
 	9350 2050 9400 2050
 Wire Wire Line
+	9350 2700 9350 2150
+Wire Wire Line
+	9350 2700 9450 2700
+Wire Wire Line
 	9350 3700 9400 3700
+Wire Wire Line
+	9350 3800 9350 3700
 Wire Wire Line
 	9400 2150 9350 2150
 Wire Wire Line
@@ -179,164 +332,6 @@ Wire Wire Line
 	9850 3750 9850 3800
 Wire Wire Line
 	9850 3800 9800 3800
-Wire Wire Line
-	1650 4750 1650 4850
-Wire Wire Line
-	1650 4850 1650 4950
-Wire Wire Line
-	1650 4950 1650 5050
-Wire Wire Line
-	1650 5050 1650 5150
-Wire Wire Line
-	2200 7100 2200 7200
-Wire Wire Line
-	2900 4850 2900 4950
-Wire Wire Line
-	2900 4950 2900 5050
-Wire Wire Line
-	2900 5050 2900 5150
-Wire Wire Line
-	3100 6800 3100 6700
-Wire Wire Line
-	3550 6500 3550 6400
-Wire Wire Line
-	5400 2500 5400 2600
-Wire Wire Line
-	9350 2050 9350 2150
-Wire Wire Line
-	9350 2700 9450 2700
-Wire Wire Line
-	9350 3800 9350 3700
-Wire Wire Line
-	2550 6400 2700 6400
-Wire Wire Line
-	4100 2400 4100 2550
-Wire Wire Line
-	4100 2650 4100 2800
-Wire Wire Line
-	1850 2300 1650 2300
-Wire Wire Line
-	1850 2400 1650 2400
-Wire Wire Line
-	1850 2500 1650 2500
-Wire Wire Line
-	1850 2600 1650 2600
-Wire Wire Line
-	1850 2700 1650 2700
-Wire Wire Line
-	1850 2800 1650 2800
-Wire Wire Line
-	1850 2900 1650 2900
-Wire Wire Line
-	1850 3000 1650 3000
-Wire Wire Line
-	2550 7200 2550 7000
-Wire Wire Line
-	5000 2500 5000 2700
-Wire Wire Line
-	7750 2600 7950 2600
-Wire Wire Line
-	7750 2700 7950 2700
-Wire Wire Line
-	7750 3200 7950 3200
-Wire Wire Line
-	7750 3300 7950 3300
-Wire Wire Line
-	7750 3400 7950 3400
-Wire Wire Line
-	7750 3500 7950 3500
-Wire Wire Line
-	7750 3600 7950 3600
-Wire Wire Line
-	2200 6850 2200 7100
-Wire Wire Line
-	2350 2900 2600 2900
-Wire Wire Line
-	2600 2300 2350 2300
-Wire Wire Line
-	2600 2400 2350 2400
-Wire Wire Line
-	2600 2500 2350 2500
-Wire Wire Line
-	2600 2600 2350 2600
-Wire Wire Line
-	2600 2700 2350 2700
-Wire Wire Line
-	2600 2800 2350 2800
-Wire Wire Line
-	2600 3000 2350 3000
-Wire Wire Line
-	4500 6400 4500 6650
-Wire Wire Line
-	4500 7200 4500 6950
-Wire Wire Line
-	6500 4150 6500 4400
-Wire Wire Line
-	7200 4150 7200 4400
-Wire Wire Line
-	7300 4150 7300 4400
-Wire Wire Line
-	2550 6400 2550 6700
-Wire Wire Line
-	2850 3950 3150 3950
-Wire Wire Line
-	2850 4400 3150 4400
-Wire Wire Line
-	2850 4550 3150 4550
-Wire Wire Line
-	2850 4700 3150 4700
-Wire Wire Line
-	4100 2800 4400 2800
-Wire Wire Line
-	2200 6400 2550 6400
-Wire Wire Line
-	2200 6400 2200 6750
-Wire Wire Line
-	3550 6400 3950 6400
-Wire Wire Line
-	3550 3950 4000 3950
-Wire Wire Line
-	3550 4050 4000 4050
-Wire Wire Line
-	3550 4250 4000 4250
-Wire Wire Line
-	3550 4450 4000 4450
-Wire Wire Line
-	5000 2050 5000 2500
-Wire Wire Line
-	5400 2600 5850 2600
-Wire Wire Line
-	5400 3400 5850 3400
-Wire Wire Line
-	5400 3500 5850 3500
-Wire Wire Line
-	5400 3600 5850 3600
-Wire Wire Line
-	5400 3800 5850 3800
-Wire Wire Line
-	5850 3300 5400 3300
-Wire Wire Line
-	5850 3700 5400 3700
-Wire Wire Line
-	5350 3200 5850 3200
-Wire Wire Line
-	3950 6400 4500 6400
-Wire Wire Line
-	9350 2700 9350 2150
-Wire Wire Line
-	3950 6800 3100 6800
-Wire Wire Line
-	5000 2700 5850 2700
-Wire Wire Line
-	4400 2800 5850 2800
-Wire Wire Line
-	7750 3800 9350 3800
-Wire Wire Line
-	7750 2800 9450 2800
-Wire Wire Line
-	7750 2900 9450 2900
-Wire Wire Line
-	9350 2050 5000 2050
 Text Notes 850  6750 0    60   ~ 0
 5 V input
 Text Notes 1700 2050 0    60   ~ 0
@@ -349,6 +344,8 @@ Text Notes 3950 2450 2    60   ~ 0
 Photo\nresistor
 Text Notes 7750 4850 2    60   ~ 0
 https://octopart.com/mem2055-00-190-01-a-global+connector+technology-13156969#
+Text Notes 7150 6400 0    60   ~ 0
+TODO for REV 2:\n* optional 5v level translation\n* corrected pinout for the IDC connector\n* enough room for the shroud of the IDC connector\n* move SD MISO pin to GPIO 35 (boot issue)\n* use a more common v-reg / SD card socket
 Text Notes 9350 4100 0    60   ~ 0
 Flash
 Text Notes 9400 1900 0    60   ~ 0
@@ -863,7 +860,7 @@ F 3 "" H 5600 2500 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L myStuff:TACTILE U4
+L rgb-rescue:TACTILE-myStuff U4
 U 1 1 5A95FB80
 P 9600 2100
 F 0 "U4" H 9450 1900 60  0000 L CNN
@@ -875,7 +872,7 @@ F 4 "P12961SCT-ND" H 8050 1550 60  0001 C CNN "DPN"
 	1    0    0    -1  
 $EndComp
 $Comp
-L myStuff:TACTILE U5
+L rgb-rescue:TACTILE-myStuff U5
 U 1 1 5A93AA67
 P 9600 3750
 F 0 "U5" H 9450 3550 60  0000 L CNN
@@ -887,7 +884,7 @@ F 4 "P12961SCT-ND" H 8050 3200 60  0001 C CNN "DPN"
 	1    0    0    -1  
 $EndComp
 $Comp
-L myStuff:LM317EMP U2
+L rgb-rescue:LM317EMP-myStuff U2
 U 1 1 5A1F2D82
 P 3100 6450
 F 0 "U2" H 3100 6858 50  0000 C CNN
@@ -898,7 +895,7 @@ F 3 "" H 3100 6450 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L myStuff:TTL_232R_3V3 P1
+L rgb-rescue:TTL_232R_3V3-myStuff P1
 U 1 1 5A926750
 P 10000 2600
 F 0 "P1" H 9972 2897 60  0000 R CNN
@@ -920,7 +917,7 @@ F 3 "" H 2050 2600 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L microsd_spi_cd:MicroSD_SPI_CD U6
+L rgb-rescue:MicroSD_SPI_CD-microsd_spi_cd U6
 U 1 1 5ABB763C
 P 4350 4250
 F 0 "U6" H 4073 4303 60  0000 R CNN
@@ -931,7 +928,7 @@ F 3 "" H 4200 4250 60  0000 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L myStuff:RASPI_SD U3
+L rgb-rescue:RASPI_SD-myStuff U3
 U 1 1 5A2024AA
 P 2850 5350
 F 0 "U3" H 3425 7037 60  0000 C CNN
@@ -942,7 +939,7 @@ F 3 "https://octopart.com/412d02f-09pc003sv-multicomp-24879217?r=sp#" H 2850 535
 	-1   0    0    -1  
 $EndComp
 $Comp
-L myStuff:ESP-WROOM-32 U1
+L rgb-rescue:ESP-WROOM-32-myStuff U1
 U 1 1 5A1F09A8
 P 6750 3150
 F 0 "U1" H 6400 3850 60  0000 C CNN
