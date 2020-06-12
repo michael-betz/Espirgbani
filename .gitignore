@@ -1,2 +1,12 @@
 *.zip
 *.bin
+*.bak
+*-bak
+*.bck
+*.dcm
+*.cmp
+*.log
+fp-info-cache
+*-PcbDoc-rescue.dcm
+*-PcbDoc-rescue.lib
+
