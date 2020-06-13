@@ -2,10 +2,10 @@
 fileVersion=1
 
 # font settings
-fontName=WillyWonka
-fontFile=./fonts/WillyWonka.ttf
+fontName=Xiomara
+fontFile=./fonts/Xiomara-Script.ttf
 charSet=0
-fontSize=-33
+fontSize=-47
 aa=1
 scaleH=100
 useSmoothing=1
@@ -14,7 +14,7 @@ isItalic=0
 useUnicode=1
 disableBoxChars=1
 outputInvalidCharGlyph=0
-dontIncludeKerningPairs=0
+dontIncludeKerningPairs=1
 useHinting=1
 renderFromOutline=0
 useClearType=0

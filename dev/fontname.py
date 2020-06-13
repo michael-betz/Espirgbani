@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 From
@@ -13,12 +13,14 @@ from fontTools import ttLib
 
 FONT_SPECIFIER_NAME_ID = 4
 
-def shortName( font ):
+
+def shortName(font):
     """Get the short name from the font's names table"""
     for record in font['name'].names:
         if record.nameID == FONT_SPECIFIER_NAME_ID:
             return record.toStr()
     return ""
 
+
 tt = ttLib.TTFont(sys.argv[1])
-print( shortName(tt) )
+print(shortName(tt).replace('/', '_'))
