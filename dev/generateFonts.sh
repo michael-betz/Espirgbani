@@ -28,7 +28,7 @@ do
 	if [ "$FONT_NAME" = "M0N0T3CHN0L0GY2407 Regular" ]; then FONT_SIZE=-50; fi
 	if [ "$FONT_NAME" = "Stoehr numbers" ]; then FONT_SIZE=-32; fi
 	if [ "$FONT_NAME" = "13\/5Atom Sans Regular" ]; then FONT_SIZE=-55; fi
-	if [ "$FONT_NAME" = "4114 Blaster" ]; then FONT_SIZE=-45; fi
+	if [ "$FONT_NAME" = "4114 Blaster" ]; then FONT_SIZE=-43; fi
 	if [ "$FONT_NAME" = "EarwigFactory-Regular" ]; then FONT_SIZE=-40; fi
 	if [ "$FONT_NAME" = "Runy Tunes Revisited NF" ]; then FONT_SIZE=-35; fi
 
