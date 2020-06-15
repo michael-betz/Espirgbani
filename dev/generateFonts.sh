@@ -21,7 +21,7 @@ do
 	if [ "$FONT_NAME" = "1900.80.5" ]; then FONT_SIZE=-43; fi
 	if [ "$FONT_NAME" = "Anime Ace Bold" ]; then FONT_SIZE=-28; fi
 	if [ "$FONT_NAME" = "GL-Nummernschild-Mtl" ]; then FONT_SIZE=-45; fi
-	if [ "$FONT_NAME" = "Hot Pizza" ]; then FONT_SIZE=-40; fi
+	if [ "$FONT_NAME" = "Hot Pizza" ]; then FONT_SIZE=-38; fi
 	if [ "$FONT_NAME" = "Digital-7" ]; then FONT_SIZE=-45; fi
 	if [ "$FONT_NAME" = "DK Crayon Crumble" ]; then FONT_SIZE=-45; fi
 	if [ "$FONT_NAME" = "Xiomara" ]; then FONT_SIZE=-47; fi
