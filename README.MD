@@ -1,10 +1,15 @@
-# Pinball DMD clock
+# ESP Pinball RGB Animation clock
 
 ![clock](https://github.com/yetifrisstlama/Espirgbani/raw/master/pcb/pdf/front.jpg)
 
-[Some older writeup here](http://yetifrisstlama.blogspot.com/2018/02/the-esp32-pinball-rgb-matrix-animation.html). Based on ESP32 and sprite_tm's I2C DMA driver.
+A LED-matrix clock, based on ESP32 and sprite_tm's I2S DMA driver.
 
-__Note:__ the firmware here is outdated and will be removed in the future. [Espirgbani_pio](https://github.com/yetifrisstlama/espirgbani_pio) is up to date, has more features, less bugs, higher frame-rate and is much easier to build.
+__Note:__ 
+the firmware here is outdated and will be removed in the future. 
+
+[Espirgbani_pio](https://github.com/yetifrisstlama/espirgbani_pio) is up to date, has more features, less bugs, higher frame-rate and is much easier to build.
+
+[Project log](http://yetifrisstlama.blogspot.com/2018/02/the-esp32-pinball-rgb-matrix-animation.html).
 
 
 # PCB
