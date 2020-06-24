@@ -2,7 +2,10 @@
 
 ![clock](https://github.com/yetifrisstlama/Espirgbani/raw/master/pcb/pdf/front.jpg)
 
-Work in progress. [Some writeup here](http://yetifrisstlama.blogspot.com/2018/02/the-esp32-pinball-rgb-matrix-animation.html). Based on ESP32 and sprite_tm's I2C DMA driver.
+[Some older writeup here](http://yetifrisstlama.blogspot.com/2018/02/the-esp32-pinball-rgb-matrix-animation.html). Based on ESP32 and sprite_tm's I2C DMA driver.
+
+__Note:__ the firmware here is outdated and will be removed in the future. [Espirgbani_pio](https://github.com/yetifrisstlama/espirgbani_pio) is up to date, has more features, less bugs, higher frame-rate and is much easier to build.
+
 
 # PCB
 Fits inside one of the 64x32 panels.
